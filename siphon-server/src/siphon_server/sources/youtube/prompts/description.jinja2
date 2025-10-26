@@ -1,0 +1,40 @@
+You are creating a **retrieval-optimized semantic description** of a YouTube video.
+
+### Inputs
+- Metadata (JSON): title, channel, description, duration, tags, etc.
+- Text (the video transcript in plain text)
+
+### Objective
+Produce a **single dense paragraph (5–8 sentences)** that maximizes the amount of retrievable meaning per token.
+
+**Guidelines**
+- Capture the full topical scope and the unique, differentiating details of the video.
+- Use **precise terminology and entity normalization** (e.g., “LoRA fine-tuning on 7B LLaMA models using RTX 3090 GPUs” instead of “fine-tuning AI models”).
+- Integrate **contrastive information** — what distinguishes this video’s perspective, method, or examples from generic coverage.
+- Combine metadata cues (title, tags, channel focus) with transcript content to establish context.
+- Use **dense, declarative prose** without formatting, lists, or line breaks.
+- Avoid filler, commentary, or value judgments.
+- Include contradictions, caveats, and relationships between ideas.
+- Preserve multilingual or code-mixed phrases if they carry semantic value; gloss only when essential.
+- No external knowledge, no citations, no timestamps.
+
+### Length control
+- Aim for **one cohesive paragraph of 80–200 words** (≈80–300 tokens).
+- Prioritize semantic density: every clause should introduce new, non-redundant information.
+- Do not exceed 250 words under any circumstance.
+
+### Output
+Return a **single paragraph** that can serve as an embedding source for vector similarity search — optimized for:
+- semantic completeness
+- minimal redundancy
+- high discriminative contrast
+
+Return only the paragraph, no headers or markup.
+
+<metadata>
+{{metadata}}
+</metadata>"
+
+<text>
+{{text}}
+</text>
