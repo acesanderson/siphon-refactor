@@ -9,11 +9,13 @@ Usage:
 import argparse
 from pathlib import Path
 
+# Relative paths
 DIR_PATH = Path(__file__).parent.resolve()
-SOURCE_DIR = Path(
-    "~/Brian_Code/siphon/siphon-server/src/siphon_server/sources"
-).expanduser()
 TEMPLATES_DIR = DIR_PATH / "templates"
+# Absolute paths
+ROOT_DIR = Path("~/Brian_Code/siphon/siphon-server").expanduser()
+SOURCE_DIR = ROOT_DIR / "src" / "siphon_server" / "sources"
+TEST_DIR = ROOT_DIR / "tests"
 PARSER_TEMPLATE = (TEMPLATES_DIR / "parser_template.txt").read_text()
 EXTRACTOR_TEMPLATE = (TEMPLATES_DIR / "extractor_template.txt").read_text()
 ENRICHER_TEMPLATE = (TEMPLATES_DIR / "enricher_template.txt").read_text()
@@ -35,7 +37,7 @@ def validate_source_name(source_name: str):
 def generate_directories(source_name: str, dry_run: bool = True):
     source_name_lower = source_name.lower()
     base_dir = SOURCE_DIR / source_name_lower
-    test_dir = base_dir / "tests"
+    test_dir = TEST_DIR / source_name_lower
     if dry_run:
         print(f"\n[DRY RUN] Would create the following directories:\n")
         print(f"  {base_dir}")
@@ -115,6 +117,7 @@ def generate_init(source_name: str, dry_run: bool = True):
 
 
 def generate_tests(source_name: str, dry_run: bool = True):
+    """/home/fishhouses/Brian_Code/siphon/siphon-server/tests"""
     source_lower = source_name.lower()
     source_upper = source_name.upper()
     content = TEST_TEMPLATE.format(
@@ -122,7 +125,7 @@ def generate_tests(source_name: str, dry_run: bool = True):
         source_lower=source_lower,
         source_upper=source_upper,
     )
-    file_path = SOURCE_DIR / source_lower / "tests" / f"test_{source_lower}.py"
+    file_path = TEST_DIR / source_lower / f"test_{source_lower}.py"
     if dry_run:
         print(f"[DRY RUN] Would create file: {file_path}\n")
         return
@@ -140,7 +143,7 @@ def generate_conftest(source_name: str, dry_run: bool = True):
         source_name=source_name,
         source_lower=source_lower,
     )
-    file_path = SOURCE_DIR / source_lower / "tests" / "conftest.py"
+    file_path = TEST_DIR / source_lower / "conftest.py"
     if dry_run:
         print(f"[DRY RUN] Would create file: {file_path}\n")
         return
@@ -169,28 +172,27 @@ def scaffold(source_name: str, dry_run: bool = True):
 def undo_scaffold(source_name: str):
     """
     Remove the scaffolded source type directory.
+    Remove the scaffolder test directory as well.
     First, print the files and directories that would be removed.
     Then, ask for confirmation before deleting.
     """
     source_lower = source_name.lower()
     base_dir = SOURCE_DIR / source_lower
-    if not base_dir.exists():
-        print(f"Error: Source directory does not exist: {base_dir}")
-        return
-    print(f"The following files and directories will be removed:\n")
-    for path in base_dir.rglob("*"):
-        print(f"  {path}")
-    confirm = input(
-        f"\nAre you sure you want to delete the entire directory '{base_dir}'? (y/n): "
-    )
+    test_dir = TEST_DIR / source_lower
+    print(f"\nThe following directories and their contents will be removed:\n")
+    print(f"  {base_dir}")
+    print(f"  {test_dir}\n")
+    confirm = input("Are you sure you want to proceed? (y/n): ")
     if confirm.lower() == "y":
-        for path in sorted(base_dir.rglob("*"), reverse=True):
-            if path.is_file():
-                path.unlink()
-            elif path.is_dir():
+        for path in [base_dir, test_dir]:
+            if path.exists() and path.is_dir():
+                for child in path.rglob("*"):
+                    if child.is_file():
+                        child.unlink()
                 path.rmdir()
-        base_dir.rmdir()
-        print(f"✓ Removed: {base_dir}")
+                print(f"✓ Removed: {path}")
+            else:
+                print(f"Error: Directory does not exist: {path}")
     else:
         print("Aborted. No files were removed.")
 
