@@ -10,8 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.120.0",
-    "pytest-watch>=4.2.0",
-    "siphon-api",
+    "siphon_api",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -24,4 +23,7 @@ include = ["src/siphon_server/py.typed"]
 [tool.uv.sources]
 siphon_api = { path = "../siphon-api", editable = true }
 
-[project.scripts]
+[dependency-groups]
+dev = [
+    "pytest-watcher>=0.4.3",
+]
