@@ -52,7 +52,7 @@ python scripts/scaffold_source.py Reddit
 #   REDDIT = "reddit"
 
 # 3. Start TDD loop
-ptw siphon-server/tests/sources/reddit/ -- -m parser -x
+ptw ~/Brian_Code/siphon/siphon-server/tests/sources/reddit/ -- -m parser -x
 ```
 
 ### What Gets Created
