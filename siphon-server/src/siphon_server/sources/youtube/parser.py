@@ -2,6 +2,7 @@ from siphon_api.interfaces import ParserStrategy
 from siphon_api.models import SourceInfo
 from siphon_api.enums import SourceType
 from typing import override
+import re
 
 
 class YouTubeParser(ParserStrategy):

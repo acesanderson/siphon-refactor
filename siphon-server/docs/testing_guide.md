@@ -78,7 +78,7 @@ siphon-server/tests/sources/reddit/
 vim siphon-server/src/siphon_server/sources/reddit/parser.py
 
 # Terminal 2: Watch tests
-ptw siphon-server/tests/sources/reddit/ -- -m parser -x
+ptw ~/Brian_Code/siphon/siphon-server/tests/youtube/ -- -m parser -x
 ```
 
 **Process:**

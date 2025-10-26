@@ -13,9 +13,14 @@ class TestYouTubeParser:
     def parser(self):
         return YouTubeParser()
 
-    def test_can_handle_valid_source(self, parser):
+    @pytest.fixture
+    def youtube_url(self):
+        return "https://www.youtube.com/watch?v=6ctoS84iFCw"
+
+    def test_can_handle_valid_source(self, parser, youtube_url):
         assert parser.can_handle("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
         assert parser.can_handle("https://youtu.be/dQw4w9WgXcQ")
+        assert parser.can_handle(youtube_url)
 
     def test_can_handle_invalid_source(self, parser):
         assert not parser.can_handle("https://vimeo.com/123456789")
@@ -37,31 +42,36 @@ class TestYouTubeParser:
 @pytest.mark.extractor
 class TestYouTubeExtractor:
     @pytest.fixture
-    def extractor(self):
-        # TODO: Mock client dependency
-        return YouTubeExtractor(client=None)
+    def parser(self):
+        return YouTubeParser()
 
     @pytest.fixture
-    def sample_source(self):
-        # TODO: Create realistic sample SourceInfo
-        return SourceInfo(
-            source_type=SourceType.YOUTUBE,
-            uri="youtube:///sample_id",
-            original_source="TODO: original URL",
-            metadata={"identifier": "sample_id"},
-        )
+    def extractor(self):
+        return YouTubeExtractor()
+
+    @pytest.fixture
+    def sample_source(self, parser):
+        source_info = parser.parse("https://www.youtube.com/watch?v=6ctoS84iFCw")
+        return source_info
 
     def test_extract_returns_content_data(self, extractor, sample_source):
-        # TODO: Implement extraction test
-        pytest.skip("TODO: Implement extract test")
+        content_data = extractor.extract(sample_source)
+        assert isinstance(content_data, ContentData)
 
     def test_extract_populates_text(self, extractor, sample_source):
-        # TODO: Verify text field is populated
-        pytest.skip("TODO: Verify text extraction")
+        content_data = extractor.extract(sample_source)
+        assert content_data.text is not None
+        assert len(content_data.text) > 0
+        assert isinstance(content_data.text, str)
 
     def test_extract_includes_metadata(self, extractor, sample_source):
-        # TODO: Verify metadata is captured
-        pytest.skip("TODO: Verify metadata extraction")
+        content_data = extractor.extract(sample_source)
+        assert "title" in content_data.metadata
+        assert len(content_data.metadata["title"]) > 0
+        assert "description" in content_data.metadata
+        assert len(content_data.metadata["description"]) > 0
+        assert "channel" in content_data.metadata
+        assert len(content_data.metadata["channel"]) > 0
 
 
 # === ENRICHER TESTS ===

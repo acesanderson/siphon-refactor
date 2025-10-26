@@ -10,7 +10,10 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.120.0",
+    "rich>=14.2.0",
     "siphon_api",
+    "youtube-transcript-api>=1.2.3",
+    "yt-dlp>=2025.08.01",
 ]
 
 [tool.hatch.build.targets.wheel]
