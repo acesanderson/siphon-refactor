@@ -1,5 +1,5 @@
 from typing import Protocol
-from siphon_api.models import SourceInfo, ContentData
+from siphon_api.models import SourceInfo, ContentData, EnrichedData
 
 
 class ParserStrategy(Protocol):
@@ -17,3 +17,12 @@ class ExtractorStrategy(Protocol):
     """
 
     def extract(self, source: SourceInfo) -> ContentData: ...
+
+
+class EnricherStrategy(Protocol):
+    """
+    Interface for content enrichment strategies.
+    (summarization approaches will differ for different content types)
+    """
+
+    def enrich(self, content: ContentData) -> EnrichedData: ...

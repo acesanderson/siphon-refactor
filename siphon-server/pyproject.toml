@@ -1,15 +1,27 @@
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
 [project]
 name = "siphon_server"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fastapi>=0.120.0",
+    "pytest-watch>=4.2.0",
+    "siphon-api",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/siphon_server"]
 sources = ["src"]
+
 [tool.hatch.build.targets.sdist]
 include = ["src/siphon_server/py.typed"]
+
+[tool.uv.sources]
+siphon_api = { path = "../siphon-api", editable = true }
+
+[project.scripts]
