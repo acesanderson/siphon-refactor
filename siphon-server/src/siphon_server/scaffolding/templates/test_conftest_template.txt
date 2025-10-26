@@ -1,0 +1,29 @@
+import pytest
+
+@pytest.fixture
+def sample_{source_lower}_url():
+    """Reusable test URL for {source_name}"""
+    # TODO: Add realistic example URL
+    return "https://example.com/{source_lower}/sample"
+
+
+@pytest.fixture
+def mock_{source_lower}_client():
+    """Mock client for {source_name} API"""
+    # TODO: Implement mock client
+    class Mock{source_name}Client:
+        def fetch(self, identifier):
+            return {{"content": "mock content", "metadata": {{}}}}
+    
+    return Mock{source_name}Client()
+
+
+@pytest.fixture
+def mock_llm():
+    """Mock LLM for enrichment tests"""
+    # TODO: Implement LLM mock with canned responses
+    class MockLLM:
+        def generate(self, prompt):
+            return "Mock summary"
+    
+    return MockLLM()
