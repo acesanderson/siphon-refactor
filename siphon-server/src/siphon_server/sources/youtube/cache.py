@@ -4,12 +4,15 @@ Two caches:
 - youtube transcripts
 """
 
+from siphon_server.sources.youtube.metadata import YouTubeMetadata
 import re
 import sqlite3
 from pathlib import Path
 from xdg_base_dirs import xdg_cache_home
 from typing import Any
 import json
+
+ID_RE = re.compile(r"^[A-Za-z0-9\-_]{11}$")
 
 
 class YouTubeMetadataCache:
@@ -21,8 +24,6 @@ class YouTubeMetadataCache:
     Validates video_id format and metadata schema on set.
     Should flag if schema drifts.
     """
-
-    _ID_RE = re.compile(r"^[A-Za-z0-9]{11}$")
 
     def __init__(self):
         cache_root = Path(xdg_cache_home()) / "siphon" / "youtube"
@@ -38,106 +39,118 @@ class YouTubeMetadataCache:
             "published_date TEXT, "
             "video_id TEXT, "
             "channel TEXT, "
-            "duration TEXT, "
+            "duration INT, "
             "description TEXT, "
-            "tags TEXT)"
+            "tags TEXT) STRICT"
         )
         self._con.commit()
 
     # Getters and setters
     def get(self, video_id: str) -> dict[str, Any] | None:
         self._validate_id(video_id)
-        # Original fetch logic
+        # Fetch row from database
         row = self._con.execute(
             "SELECT * FROM metadata WHERE id = ?",
             (video_id,),
         ).fetchone()
         if row:
-            columns = [
-                column[0] for column in self._con.execute("PRAGMA table_info(metadata)")
-            ]
-            metadata_dict = dict(zip(columns, row))
-
-            # --- Convert tags JSON string back to list ---
-            tags_value = metadata_dict.get("tags")
-            if isinstance(tags_value, str):
-                try:
-                    parsed_tags = json.loads(tags_value)
-                    # Only replace if parsing results in a list
-                    if isinstance(parsed_tags, list):
-                        metadata_dict["tags"] = parsed_tags
-                except json.JSONDecodeError:
-                    # If it's not valid JSON, leave the original string
-                    pass
-            return metadata_dict  # Return the potentially modified dictionary
-        return None  # Return None if row wasn't found
-
-    def set(self, video_id: str, metadata: dict[str, str]) -> None:
-        self._validate_id(video_id)
-        self._validate_schema(metadata)
-        # --- Convert tags list to JSON string ---
-        tags_value = metadata.get("tags")
-        if isinstance(tags_value, list):
-            tags_json = json.dumps(tags_value)  # Serialize list to JSON string
-        elif tags_value is None:
-            tags_json = None  # Keep None as None
+            metadata = self._convert_SQL_to_metadata(row)
+            return metadata
         else:
-            tags_json = str(tags_value)  # Convert other types just in case
-        # ----------------------------------------
+            return None
 
+    def set(self, video_id: str, metadata: dict[str, str | int]) -> None:
+        self._validate_id(video_id)
+        validated_metadata = YouTubeMetadata.model_validate(metadata, strict=True)
+        metadata = validated_metadata.model_dump()
+        # Convert metadata to SQL-compatible tuple
+        metadata_tuple = self._convert_metadata_to_SQL(metadata)
         self._con.execute(
-            "INSERT OR REPLACE INTO metadata (id, url, domain, title, published_date, "
-            "video_id, channel, duration, description, tags) "
+            "INSERT OR REPLACE INTO metadata ("
+            "id, url, domain, title, published_date, video_id, channel, duration, description, tags) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                video_id,
-                metadata.get("url"),
-                metadata.get("domain"),
-                metadata.get("title"),
-                metadata.get("published_date"),
-                metadata.get("video_id"),
-                metadata.get("channel"),
-                metadata.get("duration"),
-                metadata.get("description"),
-                tags_json,
-            ),
+            (video_id, *metadata_tuple),
         )
         self._con.commit()
 
+    def wipe(self) -> None:
+        self._con.execute("DELETE FROM metadata")
+        self._con.commit()
+
+    # Converters
+    def _convert_metadata_to_SQL(self, metadata: dict[str, str]) -> tuple:
+        """
+        Need to convert tags list to string for SQL storage
+        """
+        validated_metadata = YouTubeMetadata.model_validate(metadata, strict=True)
+        metadata = validated_metadata.model_dump()
+        tags = metadata.get("tags")
+        if isinstance(tags, list):
+            tags_str = json.dumps(tags)  # Convert list to JSON string
+        elif tags is None:
+            tags_str = None
+        else:
+            tags_str = str(tags)  # Just in case it's something else
+
+        return (
+            metadata.get("url"),
+            metadata.get("domain"),
+            metadata.get("title"),
+            metadata.get("published_date"),
+            metadata.get("video_id"),
+            metadata.get("channel"),
+            metadata.get("duration"),
+            metadata.get("description"),
+            tags_str,
+        )
+
+    def _convert_SQL_to_metadata(self, row: tuple) -> dict[str, str]:
+        """
+        Need to rehydrate tags json string back to list
+        """
+        (
+            _,
+            url,
+            domain,
+            title,
+            published_date,
+            video_id,
+            channel,
+            duration,
+            description,
+            tags_str,
+        ) = row
+
+        # Convert tags JSON string back to list
+        if tags_str is not None:
+            try:
+                tags = json.loads(tags_str)
+                if not isinstance(tags, list):
+                    tags = []
+            except json.JSONDecodeError:
+                tags = []
+        else:
+            tags = []
+
+        metadata = {
+            "url": url,
+            "domain": domain,
+            "title": title,
+            "published_date": published_date,
+            "video_id": video_id,
+            "channel": channel,
+            "duration": duration,
+            "description": description,
+            "tags": tags,
+        }
+        validated_metadata = YouTubeMetadata.model_validate(metadata, strict=True)
+        return validated_metadata.model_dump()
+
     # Validation methods
     @staticmethod
-    def _validate_schema(metadata: dict[str, str]) -> None:
-        """
-        Validate that metadata contains expected fields.
-        Should be 1:1 mapping to the schema defined in __init__;
-        if not, flag schema drift.
-        """
-        expected_fields = {
-            "url",
-            "domain",
-            "title",
-            "published_date",
-            "video_id",
-            "channel",
-            "duration",
-            "description",
-            "tags",
-        }
-        metadata_fields = set(metadata.keys())
-        if not expected_fields.issubset(metadata_fields):
-            missing = expected_fields - metadata_fields
-            raise ValueError(f"Metadata is missing expected fields: {missing}")
-        # Detect extra fields (schema drift)
-        extra = metadata_fields - expected_fields
-        if extra:
-            raise ValueError(
-                f"Metadata contains unexpected fields (schema drift): {extra}"
-            )
-
-    @staticmethod
     def _validate_id(video_id: str) -> None:
-        if not YouTubeMetadataCache._ID_RE.match(video_id):
-            raise ValueError("video_id must be 11 chars of [A-Za-z0-9].")
+        if not ID_RE.match(video_id):
+            raise ValueError("video_id must be 11 chars of [A-Za-z0-9\-_].")
 
 
 class YouTubeTranscriptCache:
@@ -147,8 +160,6 @@ class YouTubeTranscriptCache:
     Location: $XDG_CACHE_HOME/youtube/transcript_cache.db
     Schema:   transcripts(id TEXT PRIMARY KEY, transcript TEXT NOT NULL)
     """
-
-    _ID_RE = re.compile(r"^[A-Za-z0-9]{11}$")
 
     def __init__(self):
         cache_root = Path(xdg_cache_home()) / "siphon" / "youtube"
@@ -178,7 +189,11 @@ class YouTubeTranscriptCache:
         )
         self._con.commit()
 
+    def wipe(self) -> None:
+        self._con.execute("DELETE FROM transcripts")
+        self._con.commit()
+
     @staticmethod
     def _validate_id(video_id: str) -> None:
-        if not YouTubeTranscriptCache._ID_RE.match(video_id):
+        if not ID_RE.match(video_id):
             raise ValueError("video_id must be 11 chars of [A-Za-z0-9].")

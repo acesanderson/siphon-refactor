@@ -1,6 +1,7 @@
 from siphon_api.interfaces import ExtractorStrategy
 from siphon_api.models import SourceInfo, ContentData
 from siphon_api.enums import SourceType
+from siphon_server.sources.youtube.metadata import YouTubeMetadata
 from siphon_server.sources.youtube.cache import (
     YouTubeTranscriptCache,
     YouTubeMetadataCache,
@@ -62,7 +63,7 @@ class YouTubeExtractor(ExtractorStrategy):
 
         import re
 
-        if re.match(r"^[a-zA-Z0-9_-]{11}$", video_id):
+        if re.match(r"^[a-zA-Z0-9_\-]{11}$", video_id):
             pass
         else:
             raise ValueError("Invalid YouTube Video ID")
@@ -127,7 +128,9 @@ class YouTubeExtractor(ExtractorStrategy):
                 "description": info.get("description"),
                 "tags": info.get("tags"),
             }
-        return metadata
+        # Verify metadata
+        validated_metadata = YouTubeMetadata.model_validate(metadata, strict=True)
+        return validated_metadata.model_dump()
 
     # Transcript retrieval with caching
     def _get_cached_transcript(self, video_id: str) -> str | None:

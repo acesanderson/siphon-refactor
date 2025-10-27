@@ -1,3 +1,15 @@
+"""
+{'url': 'https://www.youtube.com/watch?v=37f0ALZg-XI',
+'domain': 'youtube.com',
+'title': 'Meta Layoffs 600 AI Employees -- Mark Zuckerberg is Popping AI Bubble',
+'published_date': '20251027',
+'video_id': '37f0ALZg-XI',
+'channel': 'Eli the Computer Guy',
+'duration': 1341,
+'description': 'Support Content at - https://donorbox.org/etcg\nLinkedIn at - https://www.linkedin.com/in/eli-etherton-a15362211/',
+'tags': ['Eli', 'the', 'Computer', 'Guy', 'Repair', 'Networking', 'Tech', 'IT', 'Startup', 'Arduino', 'iot']}
+"""
+
 from pydantic import BaseModel, Field
 
 
