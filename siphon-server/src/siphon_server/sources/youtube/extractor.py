@@ -47,7 +47,6 @@ class YouTubeExtractor(ExtractorStrategy):
         metadata: dict[str, str] = self._retrieve_metadata(video_id)
         transcript: str = self._retrieve_youtube_transcript(video_id)
         logger.info("Creating ContentData object...")
-        breakpoint()
         content_data = ContentData(
             source_type=SourceType.YOUTUBE,
             text=transcript,

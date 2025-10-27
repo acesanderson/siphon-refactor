@@ -99,7 +99,7 @@ if __name__ == "__main__":
     from siphon_server.sources.youtube.extractor import YouTubeExtractor
 
     parser = YouTubeParser()
-    source_info = parser.parse("https://www.youtube.com/watch?v=6ctoS84iFCw")
+    source_info = parser.parse("https://www.youtube.com/watch?v=IyBAuDPzdFY&t=300s")
     extractor = YouTubeExtractor()
     extracted = extractor.extract(source_info)
     enricher = YouTubeEnricher()
