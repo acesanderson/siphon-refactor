@@ -33,3 +33,7 @@ conduit = { path = "../../conduit-project", editable = true }
 dev = [
     "pytest-watcher>=0.4.3",
 ]
+
+[project.scripts]
+youtube = "siphon_server.sources.youtube.enricher:main"
+

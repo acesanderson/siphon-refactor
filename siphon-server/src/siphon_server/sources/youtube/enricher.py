@@ -94,19 +94,28 @@ class YouTubeEnricher(EnricherStrategy):
     def _generate_entities(self, input_variables: dict[str, Any]) -> list[str]: ...
 
 
-if __name__ == "__main__":
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="YouTube Enricher Test")
+    parser.add_argument("url", type=str, help="YouTube video URL to enrich")
+    args = parser.parse_args()
     from siphon_server.sources.youtube.parser import YouTubeParser
     from siphon_server.sources.youtube.extractor import YouTubeExtractor
 
+    extractor = YouTubeExtractor()
     parser = YouTubeParser()
-    source_info = parser.parse("https://www.youtube.com/watch?v=37f0ALZg-XI")
+    source_info = parser.parse(args.url)
     extractor = YouTubeExtractor()
     extracted = extractor.extract(source_info)
     enricher = YouTubeEnricher()
     enriched = enricher.enrich(extracted)
-    print("################### Enriched Data ###################")
-    print(enriched.title)
-    print("-------------------")
-    print(enriched.description)
-    print("-------------------")
-    print(enriched.summary)
+
+    from rich.console import Console
+    from rich.markdown import Markdown
+
+    console = Console()
+
+    markdown_output = f"# {enriched.title}\n\n## Description\n\n{enriched.description}\n\n## Summary\n\n{enriched.summary}"
+    markdown = Markdown(markdown_output)
+    console.print(markdown)
