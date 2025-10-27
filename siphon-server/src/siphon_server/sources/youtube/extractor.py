@@ -4,12 +4,23 @@ from siphon_api.enums import SourceType
 from siphon_server.sources.youtube.cache import YouTubeTranscriptCache
 import yt_dlp
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.proxies import WebshareProxyConfig
 from functools import lru_cache
 from typing import override, Any
+from urllib.parse import quote  # For escaping text in URLs
+import os
 import logging
 
 logger = logging.getLogger(__name__)
 cache = YouTubeTranscriptCache()
+
+WEBSHARE_USERNAME = os.getenv("WEBSHARE_USERNAME")
+WEBSHARE_PASS = os.getenv("WEBSHARE_PASS")
+if not WEBSHARE_USERNAME or not WEBSHARE_PASS:
+    logger.warning(
+        "Webshare credentials not set in environment variables. Transcript downloads may fail if rate limits are exceeded."
+    )
+    raise EnvironmentError("Webshare credentials not set in environment variables.")
 
 
 class YouTubeExtractor(ExtractorStrategy):
@@ -55,6 +66,7 @@ class YouTubeExtractor(ExtractorStrategy):
     @lru_cache(maxsize=128)
     def _retrieve_metadata(self, video_id: str) -> dict[str, Any]:
         logger.debug("Getting metadata from yt_dlp api...")
+
         with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
             info = ydl.extract_info(video_id, download=False)
             metadata = {
@@ -69,11 +81,8 @@ class YouTubeExtractor(ExtractorStrategy):
                 "video_id": info.get("id"),
                 "channel": info.get("channel"),
                 "duration": info.get("duration"),
-                "view_count": info.get("view_count"),
                 "description": info.get("description"),
                 "tags": info.get("tags"),
-                "like_count": info.get("like_count"),
-                "comment_count": info.get("comment_count"),
             }
         return metadata
 
@@ -81,10 +90,11 @@ class YouTubeExtractor(ExtractorStrategy):
         logger.debug("Checking cache for transcript...")
         cached = cache.get(video_id)
         if cached:
-            logger.debug("Transcript found in cache.")
+            logger.debug("Cache hit!")
+            return cached
         else:
             logger.debug("Transcript not found in cache.")
-        return cached
+            return None
 
     def _set_cached_transcript(self, video_id: str, transcript: str) -> None:
         logger.debug("Caching transcript...")
@@ -93,7 +103,16 @@ class YouTubeExtractor(ExtractorStrategy):
     @lru_cache(maxsize=128)
     def _use_youtube_transcript_api(self, video_id: str) -> str:
         logger.debug("Using youtube-transcript-api to download transcript...")
-        ytt_api = YouTubeTranscriptApi()
+        logger.debug("Setting up YouTubeTranscriptApi with Webshare proxy...")
+        ytt_api = YouTubeTranscriptApi(
+            proxy_config=WebshareProxyConfig(
+                proxy_username=WEBSHARE_USERNAME,
+                proxy_password=WEBSHARE_PASS,
+            )
+        )
+
+        # all requests done by ytt_api will now be proxied through Webshare
+        logger.debug("Fetching transcript...")
         fetched_transcript = ytt_api.fetch(video_id)
         t = fetched_transcript.to_raw_data()
         assert isinstance(t, list), "Transcript should be a list"

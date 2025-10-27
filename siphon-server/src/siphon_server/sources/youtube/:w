@@ -65,6 +65,7 @@ class YouTubeEnricher(EnricherStrategy):
         description = str(responses[0].content)
         summary = str(responses[1].content)
         # Construct enriched data
+        breakpoint()
         enriched_data = EnrichedData(
             source_type=source_type,
             title=title,
@@ -93,6 +94,8 @@ class YouTubeEnricher(EnricherStrategy):
 
     def _generate_entities(self, input_variables: dict[str, Any]) -> list[str]: ...
 
+    def _generate_title(self, input_variables: dict[str, Any]) -> str: ...
+
 
 if __name__ == "__main__":
     from siphon_server.sources.youtube.parser import YouTubeParser
@@ -104,9 +107,3 @@ if __name__ == "__main__":
     extracted = extractor.extract(source_info)
     enricher = YouTubeEnricher()
     enriched = enricher.enrich(extracted)
-    print("################### Enriched Data ###################")
-    print(enriched.title)
-    print("-------------------")
-    print(enriched.description)
-    print("-------------------")
-    print(enriched.summary)
