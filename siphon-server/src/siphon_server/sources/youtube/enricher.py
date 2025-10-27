@@ -20,6 +20,8 @@ cache = ConduitCache(name="siphon")
 ModelAsync.conduit_cache = cache
 # Set up logging
 logger = logging.getLogger(__name__)
+# Set root logger to silent
+logging.getLogger().setLevel(logging.CRITICAL + 10)
 
 # Constants
 PROMPTS_DIR = Path(__file__).parent / "prompts"
