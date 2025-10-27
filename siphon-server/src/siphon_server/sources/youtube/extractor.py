@@ -1,7 +1,10 @@
 from siphon_api.interfaces import ExtractorStrategy
 from siphon_api.models import SourceInfo, ContentData
 from siphon_api.enums import SourceType
-from siphon_server.sources.youtube.cache import YouTubeTranscriptCache
+from siphon_server.sources.youtube.cache import (
+    YouTubeTranscriptCache,
+    YouTubeMetadataCache,
+)
 import yt_dlp
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.proxies import WebshareProxyConfig
@@ -12,7 +15,8 @@ import os
 import logging
 
 logger = logging.getLogger(__name__)
-cache = YouTubeTranscriptCache()
+transcript_cache = YouTubeTranscriptCache()
+metadata_cache = YouTubeMetadataCache()
 
 WEBSHARE_USERNAME = os.getenv("WEBSHARE_USERNAME")
 WEBSHARE_PASS = os.getenv("WEBSHARE_PASS")
@@ -41,8 +45,9 @@ class YouTubeExtractor(ExtractorStrategy):
         logger.info(f"Processing video_id: {video_id}")
         self._validate_video_id(video_id)
         metadata: dict[str, str] = self._retrieve_metadata(video_id)
-        transcript: str = self._download_youtube_transcript(video_id)
+        transcript: str = self._retrieve_youtube_transcript(video_id)
         logger.info("Creating ContentData object...")
+        breakpoint()
         content_data = ContentData(
             source_type=SourceType.YOUTUBE,
             text=transcript,
@@ -63,8 +68,47 @@ class YouTubeExtractor(ExtractorStrategy):
         else:
             raise ValueError("Invalid YouTube Video ID")
 
-    @lru_cache(maxsize=128)
+    # Metadata retrieval with caching
     def _retrieve_metadata(self, video_id: str) -> dict[str, Any]:
+        """
+        Main method to retrieve YouTube metadata with caching.
+        """
+        logger.debug("Retrieving metadata...")
+        # Check cache first
+        cached = self._get_cached_metadata(video_id)
+        if cached:
+            return cached
+        # Download metadata using yt-dlp
+        metadata = self._use_youtube_metadata_api(video_id)
+        # Cache the metadata
+        self._set_cached_metadata(video_id, metadata)
+        return metadata
+
+    def _get_cached_metadata(self, video_id: str) -> dict[str, Any] | None:
+        """
+        Retrieve cached metadata.
+        """
+        logger.debug("Checking cache for metadata...")
+        cached = metadata_cache.get(video_id)
+        if cached:
+            logger.debug("Metadata cache hit!")
+            return cached
+        else:
+            logger.debug("Metadata not found in cache.")
+            return None
+
+    def _set_cached_metadata(self, video_id: str, metadata: dict[str, Any]) -> None:
+        """
+        Cache the metadata.
+        """
+        logger.debug("Caching metadata...")
+        metadata_cache.set(video_id, metadata)
+
+    @lru_cache(maxsize=128)
+    def _use_youtube_metadata_api(self, video_id: str) -> dict[str, Any]:
+        """
+        If not cached, download the metadata using yt-dlp.
+        """
         logger.debug("Getting metadata from yt_dlp api...")
 
         with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
@@ -86,22 +130,32 @@ class YouTubeExtractor(ExtractorStrategy):
             }
         return metadata
 
+    # Transcript retrieval with caching
     def _get_cached_transcript(self, video_id: str) -> str | None:
+        """
+        Check the cache for the transcript.
+        """
         logger.debug("Checking cache for transcript...")
-        cached = cache.get(video_id)
+        cached = transcript_cache.get(video_id)
         if cached:
-            logger.debug("Cache hit!")
+            logger.debug("Transcript cache hit!")
             return cached
         else:
             logger.debug("Transcript not found in cache.")
             return None
 
     def _set_cached_transcript(self, video_id: str, transcript: str) -> None:
+        """
+        Cache the transcript.
+        """
         logger.debug("Caching transcript...")
-        cache.set(video_id, transcript)
+        transcript_cache.set(video_id, transcript)
 
     @lru_cache(maxsize=128)
     def _use_youtube_transcript_api(self, video_id: str) -> str:
+        """
+        If not cached, download the transcript using youtube-transcript-api.
+        """
         logger.debug("Using youtube-transcript-api to download transcript...")
         logger.debug("Setting up YouTubeTranscriptApi with Webshare proxy...")
         ytt_api = YouTubeTranscriptApi(
@@ -120,8 +174,10 @@ class YouTubeExtractor(ExtractorStrategy):
         assert len(script) > 0, "Transcript should not be empty"
         return script
 
-    @lru_cache(maxsize=128)
-    def _download_youtube_transcript(self, video_id: str) -> str:
+    def _retrieve_youtube_transcript(self, video_id: str) -> str:
+        """
+        Main method to retrieve YouTube transcript with caching.
+        """
         logger.debug("Downloading transcript...")
         # Check cache first
         cached = self._get_cached_transcript(video_id)
