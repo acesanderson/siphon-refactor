@@ -2,10 +2,12 @@ from dbclients.clients.postgres import get_postgres_client
 from siphon_api.models import ProcessedContent
 import json
 
+DB_NAME = "siphon2"
+
 
 def init_table():
     """Create the processed_content cache table if it doesn't exist."""
-    with get_postgres_client("context_db")() as conn:
+    with get_postgres_client(DB_NAME)() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS processed_content (
@@ -22,7 +24,7 @@ def init_table():
 
 def set(content: ProcessedContent):
     """Cache a ProcessedContent object, upserting by URI."""
-    with get_postgres_client("context_db")() as conn:
+    with get_postgres_client(DB_NAME)() as conn:
         cursor = conn.cursor()
         cursor.execute(
             """

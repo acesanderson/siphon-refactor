@@ -73,7 +73,8 @@ def load_registry() -> list[str]:
     Load and return the list of pipelines from registry.json
     """
     if not REGISTRY_FILE.exists():
-        raise FileNotFoundError(f"Registry file not found: {REGISTRY_FILE}")
+        generate_registry()
+        assert REGISTRY_FILE.exists(), "Registry file was not created."
     content = REGISTRY_FILE.read_text()
     data = json.loads(content)
     return data.get("pipelines", [])
