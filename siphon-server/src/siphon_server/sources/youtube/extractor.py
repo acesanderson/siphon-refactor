@@ -33,6 +33,8 @@ class YouTubeExtractor(ExtractorStrategy):
     Extract content from YouTube.
     """
 
+    source_type: SourceType = SourceType.YOUTUBE
+
     @override
     def extract(self, source: SourceInfo) -> ContentData:
         """

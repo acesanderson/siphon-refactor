@@ -1,35 +1,122 @@
 from siphon_api.models import ProcessedContent, SourceInfo, ContentData, EnrichedData
-from siphon_api.interfaces import ParserStrategy, ExtractorStrategy
+from siphon_api.interfaces import (
+    ParserStrategy,
+    ExtractorStrategy,
+    EnricherStrategy,
+)
+from siphon_server.database.cache import SiphonCache
+from siphon_server.sources.registry import load_registry
 from siphon_api.enums import SourceType
-from siphon_server.cache import CacheService
-from siphon_server.enrichment import ContentEnricher
 import time
+
+REGISTRY: list[str] = load_registry()
 
 
 class SourceParser:
-    """Step 1: Parse source string → SourceInfo"""
+    """
+    Step 1: Parse source string → SourceInfo
+    """
 
-    def __init__(self, strategies: list[ParserStrategy]):
-        self.strategies = strategies
+    def __init__(self):
+        self.parsers: list[ParserStrategy] = self._find_parser()
+
+    def _find_parser(self) -> list[ParserStrategy]:
+        """
+        Cycle through all registered source types and dynamically load their parsers.
+        """
+
+        def _load_parser(source_type: str) -> ParserStrategy | None:
+            module = __import__(
+                f"siphon_server.sources.{source_type.lower()}.parser",
+                fromlist=[""],
+            )
+            parser_class_name = source_type + "Parser"
+            parser_class = getattr(module, parser_class_name, None)
+            return parser_class
+
+        parsers: list[ParserStrategy] = []
+        for source_type in REGISTRY:
+            parser = _load_parser(SourceType[source_type.upper()])
+            if parser:
+                parsers.append(parser)
+        return parsers
 
     def execute(self, source: str) -> SourceInfo:
-        for strategy in self.strategies:
-            if strategy.can_handle(source):
-                return strategy.parse(source)
+        for parser in self.parsers:
+            if parser.can_handle(source=source):
+                parser_obj = parser()
+                return parser_obj.parse(source=source)
         raise ValueError(f"No parser found for source: {source}")
 
 
 class ContentExtractor:
-    """Step 2: SourceInfo → ContentData"""
+    """
+    Step 2: SourceInfo → ContentData
+    """
 
-    def __init__(self, extractors: dict[SourceType, ExtractorStrategy]):
-        self.extractors = extractors
+    def __init__(self):
+        self.extractors: list[ExtractorStrategy] = self._find_extractor()
 
-    def execute(self, source: SourceInfo) -> ContentData:
-        extractor = self.extractors.get(source.source_type)
-        if not extractor:
-            raise ValueError(f"No extractor for {source.source_type}")
-        return extractor.extract(source)
+    def _find_extractor(self) -> list[ExtractorStrategy]:
+        """
+        Cycle through all registered source types and dynamically load their extractors.
+        """
+
+        def _load_extractor(source_type: str) -> ExtractorStrategy | None:
+            module = __import__(
+                f"siphon_server.sources.{source_type.lower()}.extractor",
+                fromlist=[""],
+            )
+            extractor_class_name = source_type + "Extractor"
+            extractor_class = getattr(module, extractor_class_name, None)
+            return extractor_class
+
+        extractors: list[ExtractorStrategy] = []
+        for source_type in REGISTRY:
+            extractor = _load_extractor(SourceType[source_type.upper()])
+            if extractor:
+                extractors.append(extractor)
+        return extractors
+
+    def execute(self, source_info: SourceInfo) -> ContentData:
+        source_type = source_info.source_type
+        for extractor in self.extractors:
+            if extractor.source_type == source_type:
+                extractor_obj = extractor()
+                return extractor_obj.extract(source=source_info)
+
+
+class ContentEnricher:
+    """
+    Step 3: ContentData → EnrichedData
+    """
+
+    def __init__(self):
+        self.enrichers: list[EnricherStrategy] = self._find_enricher()
+
+    def _find_enricher(self):
+        def _load_enricher(source_type: str) -> EnricherStrategy | None:
+            module = __import__(
+                f"siphon_server.sources.{source_type.lower()}.enricher",
+                fromlist=[""],
+            )
+            enricher_class_name = source_type + "Enricher"
+            enricher_class = getattr(module, enricher_class_name, None)
+            return enricher_class
+
+        enrichers: list[EnricherStrategy] = []
+        for source_type in REGISTRY:
+            enricher = _load_enricher(SourceType[source_type.upper()])
+            if enricher:
+                enrichers.append(enricher)
+        return enrichers
+
+    def execute(self, content_data: ContentData) -> EnrichedData:
+        source_type = content_data.source_type
+        for enricher in self.enrichers:
+            if enricher.source_type == source_type:
+                enricher_obj = enricher()
+                return enricher_obj.enrich(content=content_data)
 
 
 class SiphonPipeline:
@@ -40,25 +127,22 @@ class SiphonPipeline:
 
     def __init__(
         self,
-        parser: SourceParser,
-        extractor: ContentExtractor,
-        enricher: ContentEnricher,
-        cache: CacheService | None = None,
+        # cache: SiphonCache | None = None,
     ):
-        self.parser = parser
-        self.extractor = extractor
-        self.enricher = enricher
-        self.cache = cache
+        self.parser = SourceParser()
+        self.extractor = ContentExtractor()
+        self.enricher = ContentEnricher()
+        # self.cache = cache
 
     def process(self, source: str, use_cache: bool = True) -> ProcessedContent:
         # Step 1: Parse source
         source_info = self.parser.execute(source)
 
-        # Check cache
-        if use_cache and self.cache:
-            cached = self.cache.get(source_info.uri)
-            if cached:
-                return cached
+        # # Check cache
+        # if use_cache and self.cache:
+        #     cached = self.cache.get(source_info.uri)
+        #     if cached:
+        #         return cached
 
         # Step 2: Extract content
         content_data = self.extractor.execute(source_info)
@@ -76,8 +160,23 @@ class SiphonPipeline:
             updated_at=int(time.time()),
         )
 
-        # Cache
-        if use_cache and self.cache:
-            self.cache.set(source_info.uri, result)
+        # # Cache
+        # if use_cache and self.cache:
+        #     self.cache.set(source_info.uri, result)
 
         return result
+
+
+if __name__ == "__main__":
+    example_youtube_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    # parser = SourceParser()
+    # source_info = parser.execute(source=example_youtube_url)
+    # extractor = ContentExtractor()
+    # content_data = extractor.execute(source_info=source_info)
+    # enricher = ContentEnricher()
+    # enriched_data = enricher.execute(content_data=content_data)
+    # print("Source Info:", source_info)
+    # print("Content Data:", content_data)
+    # print("Enriched Data:", enriched_data)
+    sp = SiphonPipeline()
+    result = sp.process(source=example_youtube_url, use_cache=False)

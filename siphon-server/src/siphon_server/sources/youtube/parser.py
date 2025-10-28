@@ -2,14 +2,18 @@ from siphon_api.interfaces import ParserStrategy
 from siphon_api.models import SourceInfo
 from siphon_api.enums import SourceType
 from typing import override
-import re
 
 
 class YouTubeParser(ParserStrategy):
-    """Parse YouTube sources"""
+    """
+    Parse YouTube sources
+    """
+
+    source_type: SourceType = SourceType.YOUTUBE
 
     @override
-    def can_handle(self, source: str) -> bool:
+    @staticmethod
+    def can_handle(source: str) -> bool:
         """
         Needs to be:
         - a url
@@ -20,7 +24,8 @@ class YouTubeParser(ParserStrategy):
         )
 
     @override
-    def parse(self, source: str) -> SourceInfo:
+    @staticmethod
+    def parse(source: str) -> SourceInfo:
         """
         Parse YouTube URL into SourceInfo    source_type: SourceType
         uri: str  # Canonical identifier (e.g., "youtube:///dQw4w9WgXcQ")

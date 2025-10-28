@@ -34,6 +34,8 @@ class YouTubeEnricher(EnricherStrategy):
     Enrich YouTube content with LLM.
     """
 
+    source_type: SourceType = SourceType.YOUTUBE
+
     def __init__(self):
         from conduit.prompt.prompt_loader import PromptLoader
 
