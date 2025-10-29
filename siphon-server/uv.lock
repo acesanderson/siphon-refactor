@@ -391,9 +391,9 @@ source = { editable = "../../conduit-project" }
 dependencies = [
     { name = "anthropic" },
     { name = "dbclients" },
-    { name = "fastapi" },
     { name = "google-generativeai" },
     { name = "headwater-api" },
+    { name = "headwater-client" },
     { name = "instructor", extra = ["perplexity"] },
     { name = "jinja2" },
     { name = "ollama" },
@@ -402,14 +402,12 @@ dependencies = [
     { name = "pydantic" },
     { name = "pydub" },
     { name = "python-dotenv" },
-    { name = "requests" },
     { name = "rich" },
     { name = "ruff" },
     { name = "soundfile" },
     { name = "tiktoken" },
     { name = "tinydb" },
     { name = "ty" },
-    { name = "uvicorn" },
     { name = "xdg-base-dirs" },
 ]
 
@@ -417,9 +415,9 @@ dependencies = [
 requires-dist = [
     { name = "anthropic" },
     { name = "dbclients", editable = "../../dbclients-project" },
-    { name = "fastapi" },
     { name = "google-generativeai" },
     { name = "headwater-api", editable = "../../headwater/headwater-api" },
+    { name = "headwater-client", editable = "../../headwater/headwater-client" },
     { name = "instructor", extras = ["perplexity"] },
     { name = "jinja2" },
     { name = "ollama" },
@@ -430,7 +428,6 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-asyncio", marker = "extra == 'dev'" },
     { name = "python-dotenv" },
-    { name = "requests" },
     { name = "rich" },
     { name = "ruff", specifier = ">=0.12.4" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.12.4" },
@@ -438,7 +435,6 @@ requires-dist = [
     { name = "tiktoken" },
     { name = "tinydb" },
     { name = "ty", specifier = ">=0.0.1a15" },
-    { name = "uvicorn" },
     { name = "xdg-base-dirs", specifier = ">=6.0.2" },
 ]
 provides-extras = ["dev"]
@@ -834,6 +830,21 @@ requires-dist = [
     { name = "dbclients", editable = "../../dbclients-project" },
     { name = "pydantic", specifier = ">=2.12.3" },
     { name = "pytest" },
+]
+
+[[package]]
+name = "headwater-client"
+version = "0.1.0"
+source = { editable = "../../headwater/headwater-client" }
+dependencies = [
+    { name = "dbclients" },
+    { name = "headwater-api" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "dbclients", editable = "../../dbclients-project" },
+    { name = "headwater-api", editable = "../../headwater/headwater-api" },
 ]
 
 [[package]]
