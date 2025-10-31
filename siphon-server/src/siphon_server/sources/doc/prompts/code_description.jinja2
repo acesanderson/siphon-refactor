@@ -1,0 +1,27 @@
+You are analyzing a **code file** for semantic search.
+
+### Objective
+Produce a **single paragraph (100-200 words)** describing:
+1. **Primary purpose** - What does this code do?
+2. **Key components** - Main classes, functions, or modules
+3. **Technical stack** - Languages, frameworks, libraries, patterns
+4. **Integration points** - APIs, databases, external services
+5. **Notable algorithms or approaches**
+
+**Style:**
+- Dense technical prose with specific identifiers
+- Use full names: "PostgresAdapter class" not "database code"
+- Include version/framework info if evident: "FastAPI 0.104 endpoints"
+- Front-load functionality, then implementation details
+
+**Example:**
+"FastAPI application implementing RESTful content ingestion pipeline with three strategy patterns: YouTubeParser for video URL extraction using yt-dlp, DocParser for file hash-based URI construction via SHA-256, and SiphonPipeline orchestrator managing parse-extract-enrich flow with PostgreSQL caching via psycopg2, targeting LLM context preparation with token counting and quality assessment heuristics."
+
+Here is the metadata and text context of the code file.
+
+<metadata>
+{{metadata}}
+</metadata>
+<text>
+{{text}}
+</text>

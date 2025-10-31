@@ -2,6 +2,7 @@ from siphon_api.interfaces import ExtractorStrategy
 from siphon_api.models import SourceInfo, ContentData
 from siphon_api.enums import SourceType
 from siphon_server.sources.youtube.metadata import YouTubeMetadata
+from siphon_server.sources.youtube.get_video_id import get_video_id
 from siphon_server.sources.youtube.cache import (
     YouTubeTranscriptCache,
     YouTubeMetadataCache,
@@ -11,7 +12,6 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.proxies import WebshareProxyConfig
 from functools import lru_cache
 from typing import override, Any
-from urllib.parse import quote  # For escaping text in URLs
 import os
 import logging
 
@@ -44,7 +44,7 @@ class YouTubeExtractor(ExtractorStrategy):
         3. Download the transcript
         4. Return ContentData object.
         """
-        video_id: str = source.metadata["video_id"]
+        video_id: str = get_video_id(source.original_source)
         logger.info(f"Processing video_id: {video_id}")
         self._validate_video_id(video_id)
         metadata: dict[str, str] = self._retrieve_metadata(video_id)

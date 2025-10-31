@@ -2,6 +2,9 @@ from pathlib import Path
 from xdg_base_dirs import xdg_data_home
 import re
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 DIR_PATH = Path(__file__).parent
 DIRECTORIES = [d for d in DIR_PATH.iterdir() if d.is_dir()]
@@ -59,13 +62,13 @@ def generate_registry() -> None:
         try:
             class_name = validate_directory(directory)
             pipelines.append(class_name)
-            print(f"Validated {directory.name}: {class_name}")
+            logger.debug(f"Validated {directory.name}: {class_name}")
         except Exception as e:
-            print(f"Validation failed for {directory.name}: {e}")
+            logger.warning(f"Validation failed for {directory.name}: {e}")
     json_dict = {"pipelines": pipelines}
     REGISTRY_FILE.parent.mkdir(parents=True, exist_ok=True)
     _ = REGISTRY_FILE.write_text(json.dumps(json_dict, indent=4))
-    print(f"Wrote registry to {REGISTRY_FILE}")
+    logger.debug(f"Wrote registry to {REGISTRY_FILE}")
 
 
 def load_registry() -> list[str]:
@@ -74,7 +77,7 @@ def load_registry() -> list[str]:
     """
     if not REGISTRY_FILE.exists():
         generate_registry()
-        assert REGISTRY_FILE.exists(), "Registry file was not created."
+        assert REGISTRY_FILE.exists(), logger.error("Registry file was not created.")
     content = REGISTRY_FILE.read_text()
     data = json.loads(content)
     return data.get("pipelines", [])

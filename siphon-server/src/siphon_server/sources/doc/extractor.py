@@ -1,6 +1,11 @@
 from siphon_api.interfaces import ExtractorStrategy
 from siphon_api.models import SourceInfo, ContentData
 from siphon_api.enums import SourceType
+from siphon_api.metadata import FileMetadata
+from siphon_api.file_types import MIME_TYPES
+from datetime import datetime, timezone
+from markitdown import MarkItDown
+from pathlib import Path
 from typing import override
 
 
@@ -11,160 +16,51 @@ class DocExtractor(ExtractorStrategy):
 
     source_type: SourceType = SourceType.DOC
 
-    def __init__(self, client=None):
-        # TODO: Inject actual client dependency
-        self.client = client
-
     @override
     def extract(self, source: SourceInfo) -> ContentData:
-        # TODO: Fetch and extract content
-        raise NotImplementedError
+        text = self._extract(source)
+        metadata = self._generate_metadata(source)
+        return ContentData(source_type=self.source_type, text=text, metadata=metadata)
 
+    def _extract(self, source: SourceInfo) -> str:
+        path = Path(source.original_source)
+        md = MarkItDown()
+        return md.convert(path).text_content
 
-"""
-from siphon.data.type_definitions.extensions import Extensions
-from pathlib import Path
-
-
-dir_path = Path(__file__).parent
-asset_dir = dir_path / "assets"
-asset_files = list(asset_dir.glob("*.*"))
-
-
-# Our functions
-def route_file(file_path: Path):
-    ext = file_path.suffix.lower()
-    for category, exts in Extensions.items():
-        if ext in exts:
-            return category
-    return "unknown"
-
-
-def convert_markitdown(file_path: Path):
-    from markitdown import MarkItDown
-
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
-    if not file_path.suffix.lower() in Extensions["markitdown"]:
-        raise ValueError(f"File type not supported for MarkItDown: {file_path.suffix}")
-    # Do the conversion
-    md = MarkItDown()
-    return md.convert(file_path)
-
-
-def convert_raw(file_path: Path):
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
-    if not file_path.suffix.lower() in Extensions["raw"]:
-        raise ValueError(
-            f"File type not supported for raw conversion: {file_path.suffix}"
+    def _generate_metadata(self, source: SourceInfo) -> dict[str, str]:
+        path = Path(source.original_source)
+        metadata = FileMetadata(
+            file_name=path.name,
+            hash=source.hash,
+            created_at=self._get_created_at(path),
+            last_modified=self._get_last_modified(path),
+            file_size=self._get_file_size(path),
+            extension=path.suffix.lower(),
+            mime_type=self._get_mime_type(path.suffix.lower()),
         )
-    # Implement raw conversion logic here
-    with open(file_path, "r") as f:
-        return f.read()
+        return metadata.model_dump()
 
+    def _get_mime_type(self, extension: str) -> str:
+        """
+        Get MIME type for given extension.
+        """
+        return MIME_TYPES.get(extension, "application/octet-stream")
 
-def convert_code(file_path: Path):
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
-    if not file_path.suffix.lower() in Extensions["code"]:
-        raise ValueError(
-            f"File type not supported for code conversion: {file_path.suffix}"
-        )
-    # Implement code conversion logic here
-    with open(file_path, "r") as f:
-        return f.read()
+    def _get_created_at(self, path: Path) -> str:
+        timestamp = path.stat().st_ctime
+        dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+        return dt.isoformat()
 
+    def _get_last_modified(self, path: Path) -> str:
+        """
+        Get file last modified timestamp as ISO string.
+        """
+        timestamp = path.stat().st_mtime
+        dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
+        return dt.isoformat()
 
-def convert_audio(file_path: Path):
-    from siphon.ingestion.audio.retrieve_audio import retrieve_audio
-
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
-    if not file_path.suffix.lower() in Extensions["audio"]:
-        raise ValueError(
-            f"File type not supported for Whisper conversion: {file_path.suffix}"
-        )
-    output = retrieve_audio(file_path)
-    return output
-
-
-def convert_video(file_path: Path):
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
-    if not file_path.suffix.lower() in Extensions["video"]:
-        raise ValueError(
-            f"File type not supported for video conversion: {file_path.suffix}"
-        )
-    # Implement video conversion logic here
-    # Placeholder for actual video conversion implementation
-    raise NotImplementedError("Video conversion not implemented yet.")
-
-
-def convert_image(file_path: Path):
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
-    if not file_path.suffix.lower() in Extensions["image"]:
-        raise ValueError(
-            f"File type not supported for OCR conversion: {file_path.suffix}"
-        )
-    from siphon.ingestion.image.retrieve_image import retrieve_image
-
-    output = retrieve_image(file_path)
-    return output
-
-
-def convert_archive(file_path: Path):
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
-    if not file_path.suffix.lower() in Extensions["archive"]:
-        raise ValueError(
-            f"File type not supported for archive conversion: {file_path.suffix}"
-        )
-    # Implement archive extraction logic here
-    # Placeholder for actual archive extraction implementation
-    raise NotImplementedError("Archive extraction not implemented yet.")
-
-
-def convert_specialized(file_path: Path):
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
-    if not file_path.suffix.lower() in Extensions["specialized"]:
-        raise ValueError(
-            f"File type not supported for specialized conversion: {file_path.suffix}"
-        )
-    # Implement specialized file conversion logic here
-    # Placeholder for actual specialized file conversion implementation
-    raise NotImplementedError("Specialized file conversion not implemented yet.")
-
-
-def retrieve_file_context(file_path: Path) -> str:
-    category = route_file(file_path)
-    output = ""
-    match category:
-        case "markitdown":
-            output = convert_markitdown(file_path)
-        case "raw":
-            output = convert_raw(file_path)
-        case "code":
-            output = convert_code(file_path)
-        case "audio":
-            output = convert_audio(file_path)
-        case "video":
-            output = convert_video(file_path)
-        case "image":
-            output = convert_image(file_path)
-        case "archive":
-            output = convert_archive(file_path)
-        case "specialized":
-            output = convert_specialized(file_path)
-        case "unknown":
-            raise ValueError(f"Unknown file type for: {file_path}")
-        case _:
-            raise ValueError(f"Unsupported file type: {file_path.suffix}")
-
-    if output:
-        return output
-    else:
-        raise ValueError(f"Failed to convert file: {file_path}")
-"""
+    def _get_file_size(self, path: Path) -> int:
+        """
+        Get file size in bytes.
+        """
+        return path.stat().st_size

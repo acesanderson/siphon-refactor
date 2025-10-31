@@ -1,0 +1,41 @@
+You are creating a **retrieval-optimized semantic description** of a document.
+
+### Inputs
+- Metadata (JSON): filename, extension, mime_type, file_size, created_at, last_modified
+- Text (the document content in plain text or markdown)
+
+### Objective
+Produce a **single dense paragraph (5–8 sentences)** that maximizes the amount of retrievable meaning per token.
+
+**Guidelines**
+- Capture the document's purpose, scope, and unique, differentiating details.
+- Use **precise terminology and entity normalization** (e.g., "ISO 8601 datetime formatting in Python with timezone-aware UTC conversion" instead of "time formatting in code").
+- Integrate **document type and context** — what distinguishes this document's approach, methodology, or examples from generic coverage of the topic.
+- Combine metadata cues (filename, extension, dates) with document content to establish context.
+- Use **dense, declarative prose** without formatting, lists, or line breaks.
+- Avoid filler, commentary, or value judgments.
+- Include contradictions, caveats, and relationships between ideas.
+- Preserve technical terms, proper nouns, and specialized vocabulary if they carry semantic value.
+- No external knowledge, no citations, no page numbers or section references.
+
+### Length control
+- Aim for **one cohesive paragraph of 80–200 words** (≈80–300 tokens).
+- Prioritize semantic density: every clause should introduce new, non-redundant information.
+- Do not exceed 250 words under any circumstance.
+
+### Output
+Return a **single paragraph** that can serve as an embedding source for vector similarity search — optimized for:
+- semantic completeness
+- minimal redundancy
+- high discriminative contrast
+
+Return only the paragraph, no headers or markup.
+
+Here is the metadata + contents of the document.
+
+<metadata>
+{{metadata}}
+</metadata>
+<text>
+{{text}}
+</text>

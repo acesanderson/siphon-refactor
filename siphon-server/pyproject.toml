@@ -11,6 +11,7 @@ requires-python = ">=3.12, <3.14"
 dependencies = [
     "conduit",
     "fastapi>=0.120.0",
+    "markitdown[all]",
     "rich>=14.2.0",
     "siphon_api",
     "sqlalchemy>=2.0.44",

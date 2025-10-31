@@ -1,0 +1,43 @@
+You are creating a **retrieval-optimized semantic description** of a presentation.
+
+### Inputs
+- Metadata (JSON): filename, extension, mime_type, file_size, created_at, last_modified
+- Text (extracted slide content including titles, bullet points, and speaker notes)
+
+### Objective
+Produce a **single dense paragraph (5–8 sentences)** that maximizes the amount of retrievable meaning per token.
+
+**Guidelines**
+- Capture the presentation's **core thesis, key arguments, and intended takeaways**.
+- Identify **target audience and presentation context** (pitch deck, training material, conference talk, quarterly review, etc.).
+- Use **precise terminology** for concepts, frameworks, data points, and recommendations presented.
+- Synthesize across slides to capture **narrative arc**: problem → analysis → solution or context → findings → implications.
+- Include **specific metrics, case studies, or examples** that distinguish this presentation from generic coverage.
+- Note **visual emphasis** if evident from text: "data visualization comparing Q1-Q4 performance", "before/after workflow diagrams", "cost-benefit analysis tables".
+- Combine metadata cues (filename like "Q4-Sales-Review.pptx") with slide content to establish business context.
+- Use **dense, declarative prose** without formatting, lists, or line breaks.
+- Avoid slide-by-slide enumeration; synthesize themes across the deck.
+- Preserve technical terms, product names, and quantitative claims.
+- No external knowledge, no slide numbers.
+
+### Length control
+- Aim for **one cohesive paragraph of 100-200 words** (≈100-300 tokens).
+- Prioritize semantic density: every clause should introduce new, non-redundant information.
+- Do not exceed 250 words under any circumstance.
+
+### Output
+Return a **single paragraph** that can serve as an embedding source for vector similarity search — optimized for:
+- semantic completeness
+- minimal redundancy
+- high discriminative contrast
+
+Return only the paragraph, no headers or markup.
+
+Here is the metadata + content of the presentation.
+
+<metadata>
+{{metadata}}
+</metadata>
+<text>
+{{text}}
+</text>

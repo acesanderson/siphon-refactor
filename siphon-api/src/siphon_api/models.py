@@ -11,8 +11,7 @@ class SourceInfo(BaseModel):
     source_type: SourceType
     uri: str  # Canonical identifier (e.g., "youtube:///dQw4w9WgXcQ")
     original_source: str  # User input (e.g., "https://youtube.com/watch?v=dQw4w9WgXcQ")
-    checksum: str | None = None
-    metadata: dict[str, Any] = Field(default_factory=dict)
+    hash: str | None = None
 
 
 class ContentData(BaseModel):

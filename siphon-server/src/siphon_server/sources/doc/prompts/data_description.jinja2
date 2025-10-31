@@ -1,0 +1,27 @@
+You are analyzing **tabular data** for semantic search.
+
+### Objective
+Produce a **single paragraph (80-150 words)** describing:
+1. **Dataset domain** - What does this data represent?
+2. **Schema** - Key columns and their data types/purposes
+3. **Dimensions** - Row count, time ranges, categorical breakdowns
+4. **Relationships** - How columns relate (metrics, dimensions, joins)
+5. **Notable patterns** - Aggregations, outliers, trends if evident
+
+**Style:**
+- List actual column names in description
+- Include units and scales: "revenue in USD", "daily timestamps"
+- Note granularity: "per-transaction" vs "monthly aggregates"
+- Specify completeness: "Q1-Q4 2024" not "yearly data"
+
+**Example:**
+"Customer transaction log with 47,293 rows spanning January-December 2024, schema includes customer_id (UUID), transaction_date (daily), amount_usd (decimal), product_category (8 categories), region (12 US regions), and payment_method, aggregatable by customer cohort or geographic segment, contains calculated fields for customer_lifetime_value and churn_probability."
+
+Here is the metadata and contents of the data file.
+
+<metadata>
+{{metadata}}
+</metadata>
+<text>
+{{text}}
+</text>

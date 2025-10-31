@@ -1,6 +1,7 @@
 from siphon_api.interfaces import ParserStrategy
 from siphon_api.models import SourceInfo
 from siphon_api.enums import SourceType
+from siphon_server.sources.youtube.get_video_id import get_video_id
 from typing import override
 
 
@@ -28,36 +29,17 @@ class YouTubeParser(ParserStrategy):
         Parse YouTube URL into SourceInfo    source_type: SourceType
         uri: str  # Canonical identifier (e.g., "youtube:///dQw4w9WgXcQ")
         original_source: str  # User input (e.g., "https://youtube.com/watch?v=dQw4w9WgXcQ")
-        checksum: str | None = None
-        metadata: dict[str, Any] = Field(default_factory=dict)
+        hash: str | None = None
         """
-        import re
 
-        # Extract video ID from URL
-        video_id = None
-        youtube_regex = (
-            r"(?:v=|\/)([0-9A-Za-z_-]{11}).*"  # Matches v=VIDEO_ID or /VIDEO_ID
-        )
-        short_youtube_regex = r"youtu\.be\/([0-9A-Za-z_-]{11})"
-
-        match = re.search(youtube_regex, source)
-        if match:
-            video_id = match.group(1)
-        else:
-            match = re.search(short_youtube_regex, source)
-            if match:
-                video_id = match.group(1)
-
-        if not video_id:
-            raise ValueError("Invalid YouTube URL")
+        video_id = get_video_id(source)
 
         uri = f"youtube:///{video_id}"
-        checksum = None  # YouTube videos don't have a checksum in this context
+        hash = None  # YouTube videos don't have a checksum in this context
 
         return SourceInfo(
             source_type=SourceType.YOUTUBE,
             uri=uri,
             original_source=source,
-            checksum=checksum,
-            metadata={"video_id": video_id},
+            hash=hash,
         )

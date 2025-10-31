@@ -4,13 +4,23 @@ from siphon_api.interfaces import (
     ExtractorStrategy,
     EnricherStrategy,
 )
-from siphon_server.database.cache import SiphonCache
-from siphon_server.sources.registry import load_registry
+
+# from siphon_server.database.cache import SiphonCache
+from siphon_server.sources.registry import load_registry, generate_registry
 from siphon_api.enums import SourceType
 import time
 import logging
+import os
 
+# Set up logging
+log_level = int(os.getenv("PYTHON_LOG_LEVEL", "3"))  # Default to DEBUG for now
+levels = {1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}
+logging.basicConfig(
+    level=levels.get(log_level, logging.INFO), format="%(levelname)s: %(message)s"
+)
 logger = logging.getLogger(__name__)
+
+generate_registry()  # We will remove this in production
 
 REGISTRY: list[str] = load_registry()
 
@@ -51,9 +61,9 @@ class SourceParser:
     def execute(self, source: str) -> SourceInfo:
         logger.debug(f"Executing SourceParser for source: {source}")
         for parser in self.parsers:
-            if parser.can_handle(source=source):
+            parser_obj = parser()
+            if parser_obj.can_handle(source=source):
                 logger.info(f"Using parser {parser.__name__} for source: {source}")
-                parser_obj = parser()
                 return parser_obj.parse(source=source)
         raise ValueError(f"No parser found for source: {source}")
 
@@ -158,19 +168,19 @@ class SiphonPipeline:
         self.parser = SourceParser()
         self.extractor = ContentExtractor()
         self.enricher = ContentEnricher()
-        self.cache = SiphonCache()
+        # self.cache = SiphonCache()
 
     def process(self, source: str, use_cache: bool = True) -> ProcessedContent:
         # Step 1: Parse source
         source_info = self.parser.execute(source)
         logger.info(f"Parsed source info: {source_info}")
 
-        # Check cache
-        if use_cache and self.cache:
-            cached = self.cache.get(source_info.uri)
-            if cached:
-                logger.info(f"Cache hit for URI: {source_info.uri}")
-                return cached
+        # # Check cache
+        # if use_cache and self.cache:
+        #     cached = self.cache.get(source_info.uri)
+        #     if cached:
+        #         logger.info(f"Cache hit for URI: {source_info.uri}")
+        #         return cached
 
         # Step 2: Extract content
         content_data = self.extractor.execute(source_info)
@@ -191,23 +201,22 @@ class SiphonPipeline:
         )
         logger.info(f"Processed content assembled.")
 
-        # Cache
-        if use_cache and self.cache:
-            self.cache.set(source_info.uri, result)
+        # # Cache
+        # if use_cache and self.cache:
+        #     self.cache.set(source_info.uri, result)
 
         return result
 
 
 if __name__ == "__main__":
-    example_youtube_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-    # parser = SourceParser()
-    # source_info = parser.execute(source=example_youtube_url)
-    # extractor = ContentExtractor()
-    # content_data = extractor.execute(source_info=source_info)
-    # enricher = ContentEnricher()
-    # enriched_data = enricher.execute(content_data=content_data)
-    # print("Source Info:", source_info)
-    # print("Content Data:", content_data)
-    # print("Enriched Data:", enriched_data)
+    # example_youtube_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    # sp = SiphonPipeline()
+    # result = sp.process(source=example_youtube_url, use_cache=True)
+
+    from pathlib import Path
+
+    ASSET_DIR = Path(__file__).parent.parent.parent.parent / "assets"
+    # SAMPLE_PDF = ASSET_DIR / "basic-text.pdf"
+    SAMPLE_PDF = ASSET_DIR / "large-doc.pdf"
     sp = SiphonPipeline()
-    result = sp.process(source=example_youtube_url, use_cache=True)
+    result = sp.process(source=str(SAMPLE_PDF), use_cache=False)
