@@ -12,8 +12,7 @@ class YouTubeParser(ParserStrategy):
     source_type: SourceType = SourceType.YOUTUBE
 
     @override
-    @staticmethod
-    def can_handle(source: str) -> bool:
+    def can_handle(self, source: str) -> bool:
         """
         Needs to be:
         - a url
@@ -24,8 +23,7 @@ class YouTubeParser(ParserStrategy):
         )
 
     @override
-    @staticmethod
-    def parse(source: str) -> SourceInfo:
+    def parse(self, source: str) -> SourceInfo:
         """
         Parse YouTube URL into SourceInfo    source_type: SourceType
         uri: str  # Canonical identifier (e.g., "youtube:///dQw4w9WgXcQ")

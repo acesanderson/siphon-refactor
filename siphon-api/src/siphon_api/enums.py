@@ -2,13 +2,13 @@ from enum import Enum
 
 
 class SourceType(str, Enum):
+    DOC = "Doc"
+    YOUTUBE = "YouTube"
     # IMAGE = "Image"
     # AUDIO = "Audio"
     # VIDEO = "Video"
     # TEXT = "Text"
-    # DOC = "Doc"
     # ARTICLE = "Article"
-    YOUTUBE = "YouTube"
     # GITHUB = "GitHub"
     # REDDIT = "Reddit"
     # OBSIDIAN = "Obsidian"

@@ -10,10 +10,8 @@ class ParserStrategy(Protocol):
 
     source_type: SourceType
 
-    @staticmethod
-    def can_handle(source: str) -> bool: ...
+    def can_handle(self, source: str) -> bool: ...
 
-    @staticmethod
     def parse(self, source: str) -> SourceInfo: ...
 
 
