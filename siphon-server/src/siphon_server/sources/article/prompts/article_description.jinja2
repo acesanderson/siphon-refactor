@@ -1,0 +1,29 @@
+You are creating a retrieval-optimized semantic description of a news/article.
+
+Inputs:
+- Metadata (JSON): title, author/byline, outlet, publication date, section, tags.
+- Article text: full cleaned body (no paywall banners or cookie notices).
+
+Objective
+Write ONE dense paragraph (90–180 words) that captures:
+- Who/what/when/where and the central claim/action (nut graf).
+- Key actors and their roles, with attribution verbs (“said/reported/estimated”).
+- Specific numbers, dates, percentages, dollar amounts, and named entities preserved verbatim.
+- Distinguishing angles: new data, contradictions, methods, limitations, or impacts vs prior reporting.
+- If the piece is analysis/opinion/interview, say so explicitly in the first sentence.
+
+Constraints
+- No external knowledge. Only use information present in the article text/metadata.
+- No lists, headings, or line breaks. No speculation. 0–2 short quotes only if they materially sharpen meaning.
+- Prefer canonical entity forms (e.g., “OpenAI, Inc.” once, then “OpenAI”).
+- Keep hedges present in the article (“appears to,” “alleges,” “preliminary”) and indicate sources.
+
+Output
+- A single paragraph. 90–180 words.
+
+<metadata>
+{{metadata}}
+</metadata>
+<text>
+{{text}}
+</text>

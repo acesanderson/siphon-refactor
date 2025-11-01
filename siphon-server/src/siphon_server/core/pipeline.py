@@ -213,10 +213,15 @@ if __name__ == "__main__":
     # sp = SiphonPipeline()
     # result = sp.process(source=example_youtube_url, use_cache=True)
 
-    from pathlib import Path
-
-    ASSET_DIR = Path(__file__).parent.parent.parent.parent / "assets"
-    # SAMPLE_PDF = ASSET_DIR / "basic-text.pdf"
-    SAMPLE_PDF = ASSET_DIR / "large-doc.pdf"
+    # from pathlib import Path
+    #
+    # ASSET_DIR = Path(__file__).parent.parent.parent.parent / "assets"
+    # # SAMPLE_PDF = ASSET_DIR / "basic-text.pdf"
+    # SAMPLE_PDF = ASSET_DIR / "large-doc.pdf"
+    # sp = SiphonPipeline()
+    # result = sp.process(source=str(SAMPLE_PDF), use_cache=False)
+    url = "https://techcrunch.com/2025/10/31/reddit-ceo-says-chatbots-are-not-a-traffic-driver/"
     sp = SiphonPipeline()
-    result = sp.process(source=str(SAMPLE_PDF), use_cache=False)
+    result = sp.process(source=url, use_cache=False)
+    print("Final Result:")
+    print(result)
