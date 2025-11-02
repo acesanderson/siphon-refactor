@@ -5,7 +5,7 @@ from siphon_api.interfaces import (
     EnricherStrategy,
 )
 
-# from siphon_server.database.cache import SiphonCache
+from siphon_server.database.postgres.repository import ContentRepository
 from siphon_server.sources.registry import load_registry, generate_registry
 from siphon_api.enums import SourceType
 import time
@@ -20,9 +20,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-generate_registry()  # We will remove this in production
+# generate_registry()  # We will remove this in production
 
 REGISTRY: list[str] = load_registry()
+REPOSITORY = ContentRepository()
 
 
 class SourceParser:
@@ -175,12 +176,14 @@ class SiphonPipeline:
         source_info = self.parser.execute(source)
         logger.info(f"Parsed source info: {source_info}")
 
-        # # Check cache
-        # if use_cache and self.cache:
-        #     cached = self.cache.get(source_info.uri)
-        #     if cached:
-        #         logger.info(f"Cache hit for URI: {source_info.uri}")
-        #         return cached
+        # Check repository
+        if REPOSITORY.exists(source_info.uri):
+            logger.info(
+                f"Content already exists in repository for URI: {source_info.uri}"
+            )
+            existing_content = REPOSITORY.get(source_info.uri)
+            if existing_content:
+                return existing_content
 
         # Step 2: Extract content
         content_data = self.extractor.execute(source_info)
@@ -201,9 +204,11 @@ class SiphonPipeline:
         )
         logger.info(f"Processed content assembled.")
 
-        # # Cache
-        # if use_cache and self.cache:
-        #     self.cache.set(source_info.uri, result)
+        # Store in repository
+        REPOSITORY.set(result)
+        logger.info(
+            f"Processed content stored in repository for URI: {source_info.uri}"
+        )
 
         return result
 
@@ -220,7 +225,8 @@ if __name__ == "__main__":
     # SAMPLE_PDF = ASSET_DIR / "large-doc.pdf"
     # sp = SiphonPipeline()
     # result = sp.process(source=str(SAMPLE_PDF), use_cache=False)
-    url = "https://techcrunch.com/2025/10/31/reddit-ceo-says-chatbots-are-not-a-traffic-driver/"
+    # url = "https://techcrunch.com/2025/10/31/reddit-ceo-says-chatbots-are-not-a-traffic-driver/"
+    url = "https://blog.sshh.io/p/how-i-use-every-claude-code-feature"
     sp = SiphonPipeline()
     result = sp.process(source=url, use_cache=False)
     print("Final Result:")
