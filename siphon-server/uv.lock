@@ -2915,6 +2915,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "conduit" },
+    { name = "dbclients" },
     { name = "fastapi" },
     { name = "markitdown" },
     { name = "rich" },
@@ -2934,6 +2935,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "conduit", editable = "../../conduit-project" },
+    { name = "dbclients", editable = "../../dbclients-project" },
     { name = "fastapi", specifier = ">=0.120.0" },
     { name = "markitdown", extras = ["all"] },
     { name = "rich", specifier = ">=14.2.0" },

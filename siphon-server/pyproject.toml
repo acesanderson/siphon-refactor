@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12, <3.14"
 dependencies = [
     "conduit",
+    "dbclients",
     "fastapi>=0.120.0",
     "markitdown[all]",
     "rich>=14.2.0",
@@ -31,6 +32,7 @@ include = ["src/siphon_server/py.typed"]
 [tool.uv.sources]
 siphon_api = { path = "../siphon-api", editable = true }
 conduit = { path = "../../conduit-project", editable = true }
+dbclients = { path = "../../dbclients-project", editable = true }
 
 [dependency-groups]
 dev = [
