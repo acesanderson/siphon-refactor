@@ -106,3 +106,14 @@ class ContentRepository:
                 .all()
             )
             return [row.uri for row in results]
+
+    # Archival methods for cli
+    def get_last_processed_content(self) -> ProcessedContent | None:
+        """Get the last processed content based on creation time."""
+        with self._session() as db:
+            orm_obj = (
+                db.query(ProcessedContentORM)
+                .order_by(ProcessedContentORM.created_at.desc())
+                .first()
+            )
+            return from_orm(orm_obj) if orm_obj else None

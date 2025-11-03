@@ -51,12 +51,16 @@ class ProcessedContent(BaseModel):
 
     # Convenience properties
     @property
-    def id(self) -> str:
+    def uri(self) -> str:
         return self.source.uri
 
     @property
     def title(self) -> str:
         return self.enrichment.title
+
+    @property
+    def text(self) -> str:
+        return self.content.text
 
     @property
     def summary(self) -> str:

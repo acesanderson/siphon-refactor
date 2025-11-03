@@ -9,18 +9,12 @@ from siphon_server.database.postgres.repository import ContentRepository
 from siphon_server.sources.registry import load_registry, generate_registry
 from siphon_api.enums import SourceType
 import time
-import logging
-import os
 
-# Set up logging
-log_level = int(os.getenv("PYTHON_LOG_LEVEL", "3"))  # Default to DEBUG for now
-levels = {1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}
-logging.basicConfig(
-    level=levels.get(log_level, logging.INFO), format="%(levelname)s: %(message)s"
-)
+import logging
+
 logger = logging.getLogger(__name__)
 
-generate_registry()  # We will remove this in production
+# generate_registry()  # We will remove this in production
 
 REGISTRY: list[str] = load_registry()
 REPOSITORY = ContentRepository()
@@ -211,23 +205,3 @@ class SiphonPipeline:
         )
 
         return result
-
-
-if __name__ == "__main__":
-    # example_youtube_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-    # sp = SiphonPipeline()
-    # result = sp.process(source=example_youtube_url, use_cache=True)
-
-    # from pathlib import Path
-    #
-    # ASSET_DIR = Path(__file__).parent.parent.parent.parent / "assets"
-    # # SAMPLE_PDF = ASSET_DIR / "basic-text.pdf"
-    # SAMPLE_PDF = ASSET_DIR / "large-doc.pdf"
-    # sp = SiphonPipeline()
-    # result = sp.process(source=str(SAMPLE_PDF), use_cache=False)
-    # url = "https://techcrunch.com/2025/10/31/reddit-ceo-says-chatbots-are-not-a-traffic-driver/"
-    url = "https://blog.sshh.io/p/how-i-use-every-claude-code-feature"
-    sp = SiphonPipeline()
-    result = sp.process(source=url, use_cache=False)
-    print("Final Result:")
-    print(result)

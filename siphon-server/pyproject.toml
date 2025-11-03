@@ -40,4 +40,4 @@ dev = [
 ]
 
 [project.scripts]
-siph = "siphon_server.sources.youtube.enricher:main"
+siph = "siphon_server.cli.siphon_cli:main"
