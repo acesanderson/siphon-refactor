@@ -68,24 +68,3 @@ class AudioExtractor(ExtractorStrategy):
         Get file size in bytes.
         """
         return path.stat().st_size
-
-
-if __name__ == "__main__":
-    from siphon_server.sources.audio.example import EXAMPLE_MP3, EXAMPLE_WAV
-    from siphon_server.sources.audio.parser import AudioParser
-
-    parser = AudioParser()
-    for example in [EXAMPLE_MP3, EXAMPLE_WAV]:
-        if parser.can_handle(str(example)):
-            info = parser.parse(str(example))
-            print(info.model_dump_json(indent=4))
-
-    extractor = AudioExtractor()
-    for example in [EXAMPLE_MP3, EXAMPLE_WAV]:
-        if parser.can_handle(str(example)):
-            info = parser.parse(str(example))
-            try:
-                content = extractor.extract(info)
-                print(content.model_dump_json(indent=4))
-            except NotImplementedError:
-                print(f"Extraction not implemented for {info.source_type}")

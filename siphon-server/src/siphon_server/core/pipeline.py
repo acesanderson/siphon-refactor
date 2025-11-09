@@ -14,7 +14,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# generate_registry()  # We will remove this in production
+generate_registry()  # We will remove this in production
 
 REGISTRY: list[str] = load_registry()
 REPOSITORY = ContentRepository()

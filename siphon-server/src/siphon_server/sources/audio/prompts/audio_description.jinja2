@@ -1,0 +1,33 @@
+You are creating a **retrieval-optimized semantic description** of an audio transcript.
+
+### Inputs
+- Metadata (JSON): filename, extension, mime_type, file_size, created_at, last_modified
+- Text (a diarized transcript with speaker labels)
+
+### Objective
+Produce a **single dense paragraph (5–8 sentences)** that maximizes the amount of retrieval-meaning per token, designed for vector similarity search.
+
+**Guidelines**
+- **Infer Purpose:** Begin by stating the inferred purpose of the audio (e.g., "A personal voice memo outlining...","A multi-speaker status update meeting...","A brainstorming session to...").
+- **Synthesize Interaction:** Use the diarization to characterize the interaction (e.g., "a monologue," "a two-party discussion," "a multi-speaker debate").
+- **Extract Entities:** Identify and include specific entities such as people (e.g., "Discussion led by Speaker 1"), project names, and organizations mentioned.
+- **Capture Topics & Outcomes:** Summarize the main topics, key questions raised, decisions made, and any explicit action items or unresolved points.
+- **Use Dense Prose:** Use dense, declarative prose without formatting, lists, or line breaks.
+- **Preserve Terminology:** Retain specific technical terms, jargon, or keywords used by the speakers.
+- **No External Knowledge:** Base the description *only* on the provided metadata and transcript.
+
+### Length control
+- Aim for **one cohesive paragraph of 100-200 words**.
+- Prioritize semantic density. Do not exceed 250 words.
+
+### Output
+Return only the paragraph, no headers or markup.
+
+Here is the metadata + contents of the audio transcript.
+
+<metadata>
+{{metadata}}
+</metadata>
+<text>
+{{text}}
+</text>
