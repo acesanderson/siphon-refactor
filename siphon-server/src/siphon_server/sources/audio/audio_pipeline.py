@@ -5,7 +5,7 @@ from siphon_api.audio import DiarizationResponse
 import logging
 
 # Set up logging
-log_level = int(os.getenv("PYTHON_LOG_LEVEL", "2"))  # Default to INFO
+log_level = int(os.getenv("PYTHON_LOG_LEVEL", "3"))
 levels = {1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}
 logging.basicConfig(
     level=levels.get(log_level, logging.INFO), format="%(levelname)s: %(message)s"
@@ -13,13 +13,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Get the worker URL from the environment variable set in docker-compose.yml
-DIARIZATION_SERVICE_URL = os.getenv(
-    "DIARIZATION_SERVICE_URL",
-    "http://localhost:8000",  # Default for local dev
-)
-assert DIARIZATION_SERVICE_URL is not None, (
-    "Diarization service not available; have you run docker compose?"
-)
+DIARIZATION_SERVICE_URL = "http://localhost:8000"
 
 # --- Your existing transcribe() and combine() functions ---
 # ... (they don't need to change) ...
@@ -87,6 +81,6 @@ def process_audio(mp3_file: Path) -> list[dict]:
 
 
 if __name__ == "__main__":
-    from siphon_server.sources.audio.example import EXAMPLE_MP3
+    from siphon_server.sources.audio.example import EXAMPLE_WAV
 
-    result = process_audio(EXAMPLE_MP3)
+    diarization_result = call_diarization(EXAMPLE_WAV)

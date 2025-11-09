@@ -1,0 +1,9 @@
+services:
+  diarization-service:
+    build:
+      context: ./diarization-cpu
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}

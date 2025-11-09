@@ -1,11 +1,8 @@
-"""
-Try this with mp3.
-"""
-
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException, File
 import tempfile
 import os
 from pathlib import Path
+
 
 # Import the core logic
 from diarize import run_diarization
@@ -29,8 +26,14 @@ class DiarizationResponse(BaseModel):
 app = FastAPI(title="Diarization Worker")
 
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint to verify service is running."""
+    return {"status": "healthy", "service": "diarization"}
+
+
 @app.post("/process", response_model=DiarizationResponse)
-async def process_audio_file(file: UploadFile):
+async def process_audio_file(file: UploadFile = File(...)):
     """
     This endpoint accepts a WAV file, processes it,
     and returns the speaker segments.
