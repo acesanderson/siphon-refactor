@@ -1,8 +1,16 @@
-# In siphon-server/src/siphon_server/core/pipeline.py
 import httpx
 import os
 from pathlib import Path
 from siphon_api.audio import DiarizationResponse
+import logging
+
+# Set up logging
+log_level = int(os.getenv("PYTHON_LOG_LEVEL", "2"))  # Default to INFO
+levels = {1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}
+logging.basicConfig(
+    level=levels.get(log_level, logging.INFO), format="%(levelname)s: %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 # Get the worker URL from the environment variable set in docker-compose.yml
 DIARIZATION_SERVICE_URL = os.getenv(
@@ -53,13 +61,11 @@ def call_diarization(wav_file: Path) -> DiarizationResponse:
         raise RuntimeError(f"Diarization service failed: {e.response.text}")
 
 
-# --- Your final pipeline is now clean and decoupled ---
-
-
 def process_audio(mp3_file: Path) -> list[dict]:
     """
     Complete pipeline: MP3 -> Preprocess -> Transcribe + Diarize -> Combine
     """
+    logger.info(f"Processing audio file: {mp3_file}")
     # 1. Convert MP3 to WAV (local)
     wav_file = preprocess_audio(mp3_file)
 
@@ -78,3 +84,9 @@ def process_audio(mp3_file: Path) -> list[dict]:
     wav_file.unlink()
 
     return annotated
+
+
+if __name__ == "__main__":
+    from siphon_server.sources.audio.example import EXAMPLE_MP3
+
+    result = process_audio(EXAMPLE_MP3)
