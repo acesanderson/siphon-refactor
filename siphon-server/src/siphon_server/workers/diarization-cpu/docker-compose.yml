@@ -1,7 +1,7 @@
 services:
   diarization-service:
     build:
-      context: ./diarization-cpu
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
