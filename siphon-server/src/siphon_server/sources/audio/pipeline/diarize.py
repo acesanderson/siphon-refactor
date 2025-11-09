@@ -16,6 +16,9 @@ ML tasks and detailed exception translation for connection and service failures.
 from pathlib import Path
 from siphon_api.audio import DiarizationResponse
 import httpx
+import logging
+
+logger = logging.getLogger(__name__)
 
 DIARIZATION_SERVICE_URL = "http://localhost:8000"
 
@@ -26,6 +29,7 @@ def diarize(wav_file: Path) -> DiarizationResponse:
     """
     if not wav_file.exists():
         raise FileNotFoundError(f"Audio file not found: {wav_file}")
+    logger.debug(f"[DIARIZE] Calling diarization service for file: {wav_file}")
 
     try:
         # 1. Open the file to be uploaded
@@ -42,8 +46,8 @@ def diarize(wav_file: Path) -> DiarizationResponse:
             # 3. Check for errors from the worker
             response.raise_for_status()
 
-            # 4. This is the magic: parse the JSON response
-            # directly into our Pydantic object.
+            logger.debug(f"[DIARIZE] Received response: {response.text}")
+
             return DiarizationResponse(**response.json())
 
     except httpx.RequestError as e:
@@ -51,10 +55,3 @@ def diarize(wav_file: Path) -> DiarizationResponse:
     except httpx.HTTPStatusError as e:
         # The worker returned a 500 error
         raise RuntimeError(f"Diarization service failed: {e.response.text}")
-
-
-if __name__ == "__main__":
-    from siphon_server.sources.audio.example import EXAMPLE_WAV
-
-    diarization_result = diarize(EXAMPLE_WAV)
-    print(diarization_result)

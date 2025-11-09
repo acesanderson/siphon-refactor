@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 # Transcript workflow
-def transcribe(file_name: str | Path) -> str:
+def transcribe(file_name: str | Path) -> list[dict[str, float | str]]:
     """
     Use Whisper to retrieve text content + timestamps.
     """
@@ -22,14 +22,6 @@ def transcribe(file_name: str | Path) -> str:
         device=0,
         torch_dtype=torch.float16,
     )
-    logger.info(f"Transcribing file: {file_name}")
+    logger.debug(f"[TRANSCRIBE] Transcribing file: {file_name}")
     result = transcriber(file_name)
     return result
-
-
-if __name__ == "__main__":
-    from siphon_server.sources.audio.example import EXAMPLE_WAV
-
-    transcript = transcribe(EXAMPLE_WAV)
-    print("Transcription Result:")
-    print(transcript)
