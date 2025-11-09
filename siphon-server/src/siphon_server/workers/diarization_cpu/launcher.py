@@ -97,14 +97,32 @@ def manage_diarization_sidecar():
         logger.info("Sidecar stopped.")
 
 
-if __name__ == "__main__":
-    logger.info("--- Testing Sidecar Manager ---")
+def main():
+    """
+    Main function to run the sidecar manager standalone.
+
+    This will start the sidecar and keep it running until
+    you manually stop the script with Ctrl+C.
+    """
+    logger.info("--- Starting Sidecar Manager ---")
     try:
         with manage_diarization_sidecar():
-            logger.info("Sidecar is up. Main 'application' would be running now.")
-            logger.info("Simulating main app running for 10 seconds...")
-            time.sleep(10)
-            logger.info("Main 'application' is finishing.")
-        logger.info("--- Test complete. ---")
+            logger.info("Sidecar is up and healthy. Running indefinitely.")
+            logger.info("Press Ctrl+C to stop the sidecar and exit.")
+            try:
+                # This loop keeps the 'with' block active
+                while True:
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                logger.info("Ctrl+C received. Initiating shutdown...")
+                # The 'with' block will now exit, triggering the 'finally' clause.
+    except TimeoutError as e:
+        logger.error(f"Failed to start sidecar: {e}")
     except Exception as e:
-        logger.error(f"Test failed: {e}")
+        logger.error(f"An error occurred: {e}")
+
+    logger.info("--- Sidecar Manager stopped. ---")
+
+
+if __name__ == "__main__":
+    main()

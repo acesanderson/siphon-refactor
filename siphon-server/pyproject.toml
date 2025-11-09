@@ -16,20 +16,25 @@ dependencies = [
     "rich>=14.2.0",
     "siphon_api",
     "sqlalchemy>=2.0.44",
+    "torch",
     "trafilatura[all]>=2.0.0",
     "xdg-base-dirs>=6.0.2",
     "youtube-transcript-api>=1.2.3",
     "yt-dlp>=2025.08.01",
 ]
 
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/siphon_server"]
 sources = ["src"]
-
-[tool.hatch.build.targets.sdist]
 include = ["src/siphon_server/py.typed"]
 
 [tool.uv.sources]
+torch = { index = "pytorch-cu128" }
 siphon_api = { path = "../siphon-api", editable = true }
 conduit = { path = "../../conduit-project", editable = true }
 dbclients = { path = "../../dbclients-project", editable = true }
@@ -41,3 +46,4 @@ dev = [
 
 [project.scripts]
 siph = "siphon_server.cli.siphon_cli:main"
+diarization_service= "siphon_server.workers.diarization_cpu.launcher:main"
