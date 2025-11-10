@@ -34,10 +34,6 @@ class AudioEnricher(EnricherStrategy):
     source_type: SourceType = SourceType.AUDIO
 
     def __init__(self):
-        if content.source_type != self.source_type:
-            raise ValueError(
-                f"AudioEnricher can only enrich content of type {self.source_type}, got {content.source_type} instead."
-            )
         from conduit.prompt.prompt_loader import PromptLoader
 
         # Load prompts packaged with this module
@@ -64,6 +60,10 @@ class AudioEnricher(EnricherStrategy):
             Raises:
                 AssertionError: If LLM responses are not of type Response or if title generation fails.
         """
+        if content.source_type != self.source_type:
+            raise ValueError(
+                f"AudioEnricher can only enrich content of type {self.source_type}, got {content.source_type} instead."
+            )
         logger.info("Enriching Doc content with specialized prompts")
         description_prompt = self.prompt_loader["audio_description"]
         summary_prompt = self.prompt_loader["audio_summary"]

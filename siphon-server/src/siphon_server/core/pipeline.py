@@ -159,7 +159,7 @@ class SiphonPipeline:
     def __init__(
         self,
     ):
-        logger.debug("Initializing SiphonPipeline.")
+        logger.info("Initializing SiphonPipeline.")
         self.parser = SourceParser()
         self.extractor = ContentExtractor()
         self.enricher = ContentEnricher()
