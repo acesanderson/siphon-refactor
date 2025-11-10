@@ -153,7 +153,7 @@ MIME_TYPES = {
 }
 
 
-def get_mime_type(file_path: str | None, extension: str | None) -> str:
+def get_mime_type(file_path: str | None = None, extension: str | None = None) -> str:
     """
     Get MIME type from file extension.
     Returns 'application/octet-stream' for unknown extensions.

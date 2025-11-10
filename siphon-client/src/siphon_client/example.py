@@ -30,3 +30,11 @@ EXAMPLE_MARKDOWN = ASSETS_DIR / "example.md"
 assert EXAMPLE_MARKDOWN.exists(), (
     f"Example Markdown file does not exist: {EXAMPLE_MARKDOWN}"
 )
+
+EXAMPLES = {
+    "mp3": EXAMPLE_MP3,
+    "wav": EXAMPLE_WAV,
+    "pdf": EXAMPLE_PDF,
+    "big_pdf": EXAMPLE_BIG_PDF,
+    "markdown": EXAMPLE_MARKDOWN,
+}
