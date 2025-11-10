@@ -205,3 +205,16 @@ class SiphonPipeline:
         )
 
         return result
+
+
+if __name__ == "__main__":
+    from siphon_server.example import EXAMPLES
+
+    examples = [EXAMPLES["pdf"], EXAMPLES["mp3"], EXAMPLES["wav"]]
+
+    for index, source in enumerate(examples):
+        print(f"\n--- Processing Example {index + 1} ---")
+        pipeline = SiphonPipeline()
+        processed_content = pipeline.process(str(source))
+        print(f"Processed content for source: {source}")
+        print(processed_content)
