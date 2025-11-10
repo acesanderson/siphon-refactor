@@ -1,4 +1,4 @@
-from siphon_api.requests import SiphonFile, SiphonRequest
+from siphon_api.api.siphon_request import SiphonFile, SiphonRequest
 from siphon_api.enums import SourceOrigin
 from siphon_api.file_types import get_mime_type
 from urllib.parse import urlparse
