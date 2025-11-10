@@ -1,6 +1,11 @@
 from enum import Enum
 
 
+class SourceOrigin(str, Enum):
+    URL = "url"
+    FILE_PATH = "file_path"
+
+
 class SourceType(str, Enum):
     DOC = "Doc"
     YOUTUBE = "YouTube"

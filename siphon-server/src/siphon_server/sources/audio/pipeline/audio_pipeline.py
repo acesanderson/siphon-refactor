@@ -42,10 +42,3 @@ def retrieve_audio(audio_path: Path) -> str:
 
     logger.info("[AUDIO PIPELINE] Audio processing pipeline completed successfully")
     return formatted
-
-
-if __name__ == "__main__":
-    from siphon_server.sources.audio.example import EXAMPLE_MP3
-
-    result = retrieve_audio(EXAMPLE_MP3)
-    print(result)

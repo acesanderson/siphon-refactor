@@ -115,7 +115,7 @@ class AudioEnricher(EnricherStrategy):
 
 
 if __name__ == "__main__":
-    from siphon_server.sources.audio.example import EXAMPLE_MP3, EXAMPLE_WAV
+    from siphon_server.example import EXAMPLE_MP3, EXAMPLE_WAV
     from siphon_server.sources.audio.parser import AudioParser
     from siphon_server.sources.audio.extractor import AudioExtractor
 

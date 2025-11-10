@@ -153,17 +153,24 @@ MIME_TYPES = {
 }
 
 
-def get_mime_type(file_path: str) -> str:
+def get_mime_type(file_path: str | None, extension: str | None) -> str:
     """
     Get MIME type from file extension.
     Returns 'application/octet-stream' for unknown extensions.
     """
+    if all([file_path is None, extension is None]):
+        raise ValueError("Either file_path or extension must be provided.")
+    if all([file_path is not None, extension is not None]):
+        raise ValueError("Only one of file_path or extension should be provided.")
+
     import os
 
-    ext = os.path.splitext(file_path)[1].lower()
-
-    # Handle special case for .tar.gz
-    if file_path.endswith(".tar.gz"):
-        return MIME_TYPES[".tar.gz"]
-
-    return MIME_TYPES.get(ext, "application/octet-stream")
+    if file_path:
+        ext = os.path.splitext(file_path)[1].lower()
+        # Handle special case for .tar.gz
+        if file_path.endswith(".tar.gz"):
+            return MIME_TYPES[".tar.gz"]
+        return MIME_TYPES.get(ext, "application/octet-stream")
+    elif extension:
+        ext = extension.lower()
+        return MIME_TYPES.get(ext, "application/octet-stream")

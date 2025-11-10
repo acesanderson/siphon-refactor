@@ -1,0 +1,106 @@
+from siphon_api.enums import SourceOrigin
+from siphon_api.file_types import EXTENSIONS, get_mime_type
+from pydantic import BaseModel, Field, model_validator, field_validator
+from urllib.parse import urlparse
+from pathlib import PurePosixPath
+import base64
+import hashlib
+import hmac
+import re
+
+HEX64 = re.compile(r"^[0-9a-f]{64}$", re.IGNORECASE)
+
+
+def is_absolute_path(p: str) -> bool:
+    """Cross-platform absolute path format check, no FS access."""
+    if PurePosixPath(p).is_absolute():
+        return True
+    # Windows drive letter or UNC path
+    return bool(re.match(r"^(?:[a-zA-Z]:\\|\\\\)", p))
+
+
+class SiphonFile(BaseModel):
+    data: bytes = Field(
+        ..., description="Raw file bytes; JSON transport may be base64."
+    )
+    checksum: str = Field(..., description="SHA256 hex digest of raw bytes.")
+    mime_type: str = Field(..., description="MIME type of the file content.")
+    extension: str = Field(..., description="File extension, e.g., '.pdf', '.txt'.")
+
+    @field_validator("data", mode="before")
+    @classmethod
+    def decode_base64_if_needed(cls, v):
+        if isinstance(v, (bytes, bytearray)):
+            return bytes(v)
+        if isinstance(v, str):
+            return base64.b64decode(v, validate=True)
+        raise TypeError("data must be bytes or base64 string")
+
+    @field_validator("checksum")
+    @classmethod
+    def validate_checksum(cls, v: str) -> str:
+        v = v.lower()
+        if not HEX64.fullmatch(v):
+            raise ValueError("checksum must be a 64-character hex SHA256 digest")
+        return v
+
+    @field_validator("extension")
+    @classmethod
+    def normalize_extension(cls, v: str) -> str:
+        ext = v.lower().strip()
+        if not ext.startswith("."):
+            ext = "." + ext
+        if not any(ext in exts for exts in EXTENSIONS.values()):
+            raise ValueError(f"Unsupported file extension: {v}")
+        return ext
+
+    @model_validator(mode="after")
+    def check_digest(self):
+        computed = hashlib.sha256(self.data).hexdigest()
+        if not hmac.compare_digest(computed, self.checksum):
+            raise ValueError(
+                f"Checksum mismatch: expected {self.checksum}, got {computed}"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def validate_mime_type(self):
+        expected = get_mime_type(extension=self.extension)
+        if expected and self.mime_type.lower() != expected.lower():
+            raise ValueError(
+                f"MIME type '{self.mime_type}' does not match expected '{expected}' for extension '{self.extension}'"
+            )
+        return self
+
+
+class SiphonRequest(BaseModel):
+    source: str = Field(
+        ...,
+        description="Source string — absolute file path or URL, depending on origin.",
+    )
+    origin: SourceOrigin = Field(..., description="Either URL or FILE_PATH.")
+    file: SiphonFile | None = Field(
+        default=None,
+        description="File bytes and metadata; required for FILE_PATH origin.",
+    )
+
+    @model_validator(mode="after")
+    def validate_consistency(self):
+        if self.origin == SourceOrigin.FILE_PATH:
+            # Require absolute path (format only) and file payload
+            if not is_absolute_path(self.source):
+                raise ValueError(
+                    "source must be an absolute path when origin=FILE_PATH"
+                )
+            if self.file is None:
+                raise ValueError("file content must be provided for FILE_PATH origin.")
+        elif self.origin == SourceOrigin.URL:
+            # Require valid URL and no file payload
+            if self.file is not None:
+                raise ValueError("file content should not be provided for URL origin.")
+            parsed = urlparse(self.source)
+            if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+                raise ValueError("source must be a valid http(s) URL when origin=URL.")
+        else:
+            raise ValueError(f"Unsupported origin type: {self.origin}")
+        return self
