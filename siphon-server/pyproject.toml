@@ -46,5 +46,4 @@ dev = [
 ]
 
 [project.scripts]
-siph = "siphon_server.cli.siphon_cli:main"
 diarization_service= "siphon_server.workers.diarization_cpu.launcher:main"

@@ -26,3 +26,6 @@ include = ["src/siphon_client/py.typed"]
 [tool.uv.sources]
 siphon_api = { path = "../siphon-api", editable = true }
 headwater_client = { path = "../../headwater/headwater-client", editable = true }
+
+[project.scripts]
+siphon = "siphon_client.cli.siphon_cli:main"
