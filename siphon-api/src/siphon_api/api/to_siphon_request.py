@@ -4,10 +4,13 @@ from siphon_api.file_types import get_mime_type
 from urllib.parse import urlparse
 from pathlib import Path
 import hashlib
-import base64
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def determine_origin(source: str) -> SourceOrigin:
+    logger.debug(f"Determining origin for source: {source}")
     if Path(source).is_absolute() and Path(source).exists():
         return SourceOrigin.FILE_PATH
     else:
@@ -22,13 +25,14 @@ def create_siphon_request_from_file(file_path: Path) -> SiphonRequest:
     Create a SiphonRequest object from a file path.
     Needs to be (1) an absolute path and (2) a valid file.
     """
+    logger.debug(f"Creating SiphonRequest from file: {file_path}")
     data = file_path.read_bytes()
     checksum = hashlib.sha256(data).hexdigest()
     mime_type = get_mime_type(file_path.name)
     extension = file_path.suffix.lower()
 
     siphon_file = SiphonFile(
-        data=base64.b64encode(data).decode(),
+        data=data,
         checksum=checksum,
         mime_type=mime_type or "application/octet-stream",
         extension=extension,
@@ -45,6 +49,7 @@ def create_siphon_request_from_url(url: str) -> SiphonRequest:
     """
     Create a SiphonRequest object from a URL.
     """
+    logger.debug(f"Creating SiphonRequest from URL: {url}")
     return SiphonRequest(
         source=url,
         origin=SourceOrigin.URL,
@@ -52,10 +57,14 @@ def create_siphon_request_from_url(url: str) -> SiphonRequest:
     )
 
 
-def create_siphon_request(source: str) -> SiphonRequest:
+def create_siphon_request(source: str | Path) -> SiphonRequest:
     """
     Create a SiphonRequest object from either a file path or a URL.
     """
+    # Convert Path to str if necessary
+    if isinstance(source, Path):
+        source = str(source)
+    logger.info(f"Creating SiphonRequest for source: {source}")
     origin = determine_origin(source)
     match origin:
         case SourceOrigin.FILE_PATH:

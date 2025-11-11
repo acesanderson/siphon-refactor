@@ -1,6 +1,12 @@
 from siphon_api.enums import SourceOrigin
 from siphon_api.file_types import EXTENSIONS, get_mime_type
-from pydantic import BaseModel, Field, model_validator, field_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    model_validator,
+    field_validator,
+    field_serializer,
+)
 from urllib.parse import urlparse
 from pathlib import PurePosixPath
 import base64
@@ -31,10 +37,18 @@ class SiphonFile(BaseModel):
     @classmethod
     def decode_base64_if_needed(cls, v):
         if isinstance(v, (bytes, bytearray)):
+            # If we're given bytes, just use them (from create_siphon_request)
             return bytes(v)
         if isinstance(v, str):
+            # If we're given a str, it's from JSON and needs decoding
             return base64.b64decode(v, validate=True)
         raise TypeError("data must be bytes or base64 string")
+
+    # ADD this serializer (for JSON serialization)
+    @field_serializer("data")
+    def serialize_data_as_base64(self, v: bytes) -> str:
+        """Serializes raw bytes to a base64-encoded string for JSON."""
+        return base64.b64encode(v).decode("utf-8")
 
     @field_validator("checksum")
     @classmethod

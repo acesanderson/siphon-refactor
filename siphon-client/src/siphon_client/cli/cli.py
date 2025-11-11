@@ -1,39 +1,48 @@
+from headwater_client.client.headwater_client import HeadwaterClient
+from siphon_api.api.to_siphon_request import create_siphon_request
+from pathlib import Path
 import click
-from siphon_client.client import SiphonClient
-from siphon_client.display import display_content
+import logging
+import os
+
+# Set up logging
+log_level = int(os.getenv("PYTHON_LOG_LEVEL", "1"))  # Default to WARNING
+levels = {1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}
+logging.basicConfig(
+    level=levels.get(log_level, logging.INFO), format="%(levelname)s: %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
-@click.group()
-def cli():
-    """Siphon CLI - Universal content ingestion"""
-    pass
+def parse_source(source: str) -> str:
+    try:
+        logger.debug(f"Parsing source: {source}")
+        path = Path(source)
+        if path.exists():
+            logger.debug(f"Resolved path: {path.resolve()}")
+            return str(path.resolve())
+        logger.debug(f"Source is not a file path: {source}")
+        return source
+    except Exception:
+        logger.debug(f"Source is not a file path: {source}")
+        return source
 
 
-@cli.command()
+@click.command()
 @click.argument("source")
-@click.option("--no-cache", is_flag=True, help="Skip cache")
-@click.option("--server", default="http://localhost:8000", help="Server URL")
-def process(source: str, no_cache: bool, server: str):
-    """Process a source (file, URL, etc.)"""
-    client = SiphonClient(base_url=server)
-    result = client.process(source, use_cache=not no_cache)
-    display_content(result)
-
-
-@cli.command()
-@click.option("--source-type", help="Filter by source type")
-@click.option("--tags", help="Filter by tags (comma-separated)")
-@click.option("--since", help="Filter by date (e.g., 7d, 2024-01-01)")
-@click.option("--server", default="http://localhost:8000")
-def query(source_type: str, tags: str, since: str, server: str):
-    """Query stored content"""
-    client = SiphonClient(base_url=server)
-    tag_list = tags.split(",") if tags else None
-    results = client.query(source_type=source_type, tags=tag_list, since=since)
-
-    for result in results:
-        display_content(result)
-        click.echo("\n" + "=" * 80 + "\n")
+def cli(source: str):
+    """
+    Process a source (file, URL, etc.)
+    """
+    logger.info(f"Received source: {source}")
+    source = parse_source(source)
+    request = create_siphon_request(source)
+    logger.debug("Loading HeadwaterClient")
+    client = HeadwaterClient()
+    logger.info("Processing request")
+    result = client.siphon.process(request)
+    logger.info("Processing complete")
+    click.echo(result)
 
 
 def main():

@@ -9,10 +9,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "siphon-api",
-    "httpx",
     "click>=8.3.0",
+    "headwater-client",
+    "httpx",
     "pytest-watch>=4.2.0",
+    "siphon-api",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -24,3 +25,4 @@ include = ["src/siphon_client/py.typed"]
 
 [tool.uv.sources]
 siphon_api = { path = "../siphon-api", editable = true }
+headwater_client = { path = "../../headwater/headwater-client", editable = true }
