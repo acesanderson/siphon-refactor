@@ -1,0 +1,13 @@
+Lichen_ID,Genus_Species,Common_Name,Growth_Form,Substrate,Discovery_Date,Observer_ID,Latitude,Longitude,Notes
+LCN-001,Xanthoria_parietina,Common Orange Lichen,Foliose,Bark,2022-04-12,BOT-JDS,45.1234,-110.5678,"Found on a decaying aspen tree near Whisper Creek. Vibrant orange color, even in shade."
+LCN-002,Letharia_vulpina,Wolf Lichen,Fruticose,Conifer Bark,2022-05-21,BOT-AHR,45.1357,-110.5891,"Highly toxic. Traditionally used as a dye. Found on a Douglas Fir at high elevation."
+LCN-003,Rhizocarpon_geographicum,Map Lichen,Crustose,Siliceous Rock,2022-06-05,BOT-JDS,45.1198,-110.6012,"Forms distinctive map-like patterns on granite boulders in the alpine zone. Very slow growing."
+LCN-004,Cladonia_cristatella,British Soldiers,Fruticose,Soil/Decaying Wood,2022-07-19,BOT-MTC,45.1422,-110.5743,"Bright red apothecia resemble tiny matchsticks. Growing on a rotting log in a damp hollow."
+LCN-005,Umbilicaria_phaea,Sooty Rock-tripe,Foliose,Rock,2022-08-03,BOT-AHR,45.1189,-110.6155,"Single-point attachment to rock face. Dark brown, almost black, color. Specimen was quite brittle."
+LCN-006,Peltigera_aphthosa,Freckled Pelt,Foliose,Mossy Soil,2022-09-14,BOT-JDS,45.1501,-110.5699,"Contains cephalodia, which look like dark warts on the upper surface. Indicates nitrogen fixation."
+LCN-007,Acarospora_socialis,Cobblestone Lichen,Crustose,Rock,2022-10-28,BOT-MTC,45.1250,-110.6080,"Areoles are angular and fit together like pavement. Found on a sun-exposed cliff face."
+LCN-008,Bryoria_fremontii,Black Tree-hair,Fruticose,Conifer Branches,2023-01-11,BOT-AHR,45.1399,-110.5932,"Edible and was a traditional food source for indigenous peoples. Drapes from pine branches."
+LCN-009,Caloplaca_marina,Seaside Fire Lichen,Crustose,Rock (Splash Zone),2023-02-22,BOT-JDS,45.1612,-110.5541,"Unusual for this altitude, found near a saline hot spring, mimicking a coastal environment."
+LCN-010,Hypogymnia_physodes,Monk's-hood Lichen,Foliose,Bark/Twigs,2023-03-15,BOT-MTC,45.1287,-110.5817,"Lobes are hollow and inflated. Common on a variety of tree species throughout the lower valley."
+LCN-011,Lobaria_pulmonaria,Lungwort,Foliose,Deciduous Bark,2023-04-01,BOT-AHR,45.1456,-110.5705,"Resembles lung tissue, used in traditional medicine. Sensitive to air pollution, a good bioindicator."
+LCN-012,Usnea_barbata,Old Man's Beard,Fruticose,Bark,2023-05-18,BOT-JDS,45.1333,-110.5821,"Hangs in long tassels from older trees. Central cord is elastic when wet, a key identifier."

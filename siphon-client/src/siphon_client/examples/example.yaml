@@ -1,0 +1,68 @@
+# Myco-Linguistic Network Configuration File
+# Schema Version: 1.2.beta
+# This file defines the parameters for a bio-digital interface
+# designed to interpret fungal mycelial network communications.
+
+network_profile:
+  profile_name: "Amanita Muscaria Grove - Sector Gamma"
+  location_gps: "48.8584° N, 2.2945° E"
+  primary_species: "Amanita muscaria"
+  secondary_species:
+    - "Lactarius indigo"
+    - "Mycena chlorophos"
+  activation_date: 2023-10-29T18:00:00Z
+  network_status: "ACTIVE_MONITORING"
+  description: >
+    This profile targets a mature mycelial network in a symbiotic relationship
+    with a cluster of birch and pine trees. The network exhibits unusually high
+    levels of electrical potential variance, suggesting complex signaling.
+    Primary research objective is to decode potential pre-symbolic language patterns.
+
+sensor_array_config:
+  array_id: "SA-GAMMA-07"
+  sensor_type: "Voltammetric Micro-Array Probes"
+  probe_count: 512
+  sampling_frequency_hz: 10000
+  data_resolution_bits: 24
+  active_channels: [1-128, 257-384] # Channel ranges currently providing stable data
+  power_settings:
+    voltage: 3.3
+    mode: "LOW_POWER_CONTINUOUS"
+    sleep_interval_minutes: 0 # Never sleeps in active mode
+
+data_processing_pipeline:
+  - stage: "Noise Reduction"
+    algorithm: "Wavelet Denoising"
+    parameters:
+      mother_wavelet: "db4"
+      decomposition_level: 8
+      threshold_rule: "soft"
+  - stage: "Signal Separation"
+    algorithm: "Independent Component Analysis (ICA)"
+    parameters:
+      max_iterations: 500
+      tolerance: 1.0e-6
+  - stage: "Pattern Recognition"
+    algorithm: "Recurrent Neural Network (RNN)"
+    model_path: "/models/myco_lstm_v4.2.h5"
+    parameters:
+      sequence_length: 256
+      confidence_threshold: 0.85
+
+alerting_protocols:
+  - protocol:
+      name: "High Amplitude Anomaly"
+      trigger_condition: "signal_amplitude > 5.0 * std_dev"
+      cooldown_seconds: 1800
+      actions:
+        - "log_event"
+        - "send_push_notification:group=neuroMycology"
+        - "capture_high_res_snapshot:duration=60s"
+  - protocol:
+      name: "Synchronized Network Pulse"
+      trigger_condition: "correlation_coefficient > 0.95 across > 50% of channels"
+      cooldown_seconds: 3600
+      actions:
+        - "log_event:priority=CRITICAL"
+        - "trigger_spectrometer_analysis"
+        - "page_on_call_researcher"

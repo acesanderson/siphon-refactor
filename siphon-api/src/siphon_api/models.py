@@ -59,6 +59,10 @@ class ProcessedContent(BaseModel):
         return self.enrichment.title
 
     @property
+    def description(self) -> str:
+        return self.enrichment.description
+
+    @property
     def text(self) -> str:
         return self.content.text
 

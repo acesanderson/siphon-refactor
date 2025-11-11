@@ -1,0 +1,23 @@
+Myco-Linguistic Field Guide - Entry #734
+
+Common Name: The Echo Cap, Whistler's Spore
+Scientific Name: *Phonoluminus repetitus*
+
+Classification:
+Kingdom: Fungi
+Phylum: Basidiomycota
+Class: Agaricomycetes
+Order: Agaricales
+Family: Mycenaceae
+
+Description:
+*Phonoluminus repetitus* is a small, bioluminescent fungus, typically measuring 2-5 cm in height. The cap is conical, almost bell-shaped, and ranges in color from a pale, ghostly white to a faint lavender. The gills underneath are tightly packed and emit a soft, pulsating blue-green light, most visible in low-light conditions. The stipe (stem) is slender, fibrous, and surprisingly resilient, often covered in a fine, downy mycelium that anchors it to decaying wood.
+
+Habitat:
+This species is found exclusively in old-growth temperate rainforests with high humidity and significant canopy cover. It thrives on the decaying logs of coniferous trees, particularly Douglas Fir and Western Hemlock. It often grows in small, clustered colonies, with the collective glow being a key identifier from a distance.
+
+Acoustic Mimicry:
+The most remarkable characteristic of the Echo Cap is its ability to replicate simple, high-frequency sounds. The fungus possesses a unique cellular structure within its gills that vibrates in response to specific sonic frequencies, such as birdsong, dripping water, or the rustling of leaves. After a period of exposure, the fungus will "play back" a slightly distorted, ethereal version of the sound. This is achieved through the rapid, controlled release of gas pockets from specialized pores on the gill surface, creating a whistling or humming resonance. This mimicry is believed to be a defense mechanism to startle potential fungivores or, more speculatively, a method of inter-colony communication.
+
+Field Notes:
+While fascinating, direct handling is not advised. The spores can cause mild auditory hallucinations if inhaled in large quantities. The "echo" produced is not a perfect copy; it is often pitched higher and has a distinct, flute-like quality. Recording its sounds requires sensitive equipment, as the volume is quite low.

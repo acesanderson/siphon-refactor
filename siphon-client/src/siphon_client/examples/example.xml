@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AlchemicalCodex version="1.3" maintainer="ScribesGuild">
+    <!-- A collection of rare and potent alchemical formulae -->
+    <Recipe id="TR-001" difficulty="Adept">
+        <Title>Elixir of Fleeting Starlight</Title>
+        <Author era="ThirdEpoch">Lyra of the Silver Spire</Author>
+        <Purpose>Grants the imbiber the ability to perceive echoes of the recent past, lasting for a single lunar cycle. Useful for investigations and historical research.</Purpose>
+        <Ingredients>
+            <Ingredient quantity="3" unit="drams">Powdered Moonstone</Ingredient>
+            <Ingredient quantity="1" unit="pinch">Crystallized Chronos Dust</Ingredient>
+            <Ingredient quantity="7" unit="motes">Captured Starlight</Ingredient>
+            <Ingredient quantity="1" unit="vial">Pure spring water, collected under a new moon</Ingredient>
+        </Ingredients>
+        <Procedure>
+            <Step number="1">Gently heat the spring water in a silver cauldron. Do not allow it to boil, as this will agitate the temporal spirits within.</Step>
+            <Step number="2">Dissolve the Powdered Moonstone while chanting the incantation of temporal sight, stirring counter-clockwise.</Step>
+            <Step number="3">Carefully add the Crystallized Chronos Dust. The mixture will hiss and release a cool vapor.</Step>
+            <Step number="4">Infuse the motes of starlight one by one. The mixture should shimmer with a faint, ethereal glow upon completion.</Step>
+            <Step number="5">Decant into a crystal phial and allow it to cool in complete darkness for three nights before use.</Step>
+        </Procedure>
+        <Notes>
+            <![CDATA[Warning: Consumption may lead to temporal disorientation or "time-sickness." Do not operate heavy scrying orbs or engage in chronomantic rituals after imbibing. Best used in a controlled environment.]]>
+        </Notes>
+    </Recipe>
+    <Recipe id="TM-042" difficulty="Master">
+        <Title>Philosopher's Dew</Title>
+        <Author>Unknown</Author>
+        <Purpose>A preliminary agent for the minor transmutation of base metals. Primarily used to convert lead into tin as a proof of concept for the Magnum Opus.</Purpose>
+        <Ingredients>
+            <Ingredient quantity="1" unit="part">Quicksilver, purified by solar distillation</Ingredient>
+            <Ingredient quantity="3" unit="parts">Vitriol of the Green Lion</Ingredient>
+            <Ingredient quantity="1" unit="item">Nascent Phoenix Feather</Ingredient>
+        </Ingredients>
+        <Procedure>
+            <Step number="1">Combine Quicksilver and vitriol in a sealed alembic under the sign of Mercury.</Step>
+            <Step number="2">Apply slow, consistent heat for forty days and nights, observing the color phases from black (nigredo) to white (albedo).</Step>
+            <Step number="3">Introduce the phoenix feather during the citrinitas (yellowing) phase. This will stabilize the reaction.</Step>
+            <Step number="4">The final substance, a viscous, golden liquid, is the Philosopher's Dew. Handle only with enchanted tongs.</Step>
+        </Procedure>
+    </Recipe>
+</AlchemicalCodex>

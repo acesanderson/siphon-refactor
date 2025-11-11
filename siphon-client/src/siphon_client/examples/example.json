@@ -1,0 +1,47 @@
+```json
+{
+  "specimenCatalogId": "MYCO-FL-7B4",
+  "collectionDate": "2023-10-28",
+  "location": {
+    "latitude": 45.4215,
+    "longitude": -75.6972,
+    "habitat": "Deciduous forest floor, growing on decaying birch log.",
+    "altitude": "75m"
+  },
+  "speciesIdentification": {
+    "genus": "Mycena",
+    "species": "haematopus",
+    "commonName": "Bleeding Fairy Helmet",
+    "confidenceLevel": "High",
+    "identifiedBy": "A. Renaud"
+  },
+  "morphologicalData": {
+    "cap": {
+      "diameter_cm": 2.5,
+      "shape": "Conical to campanulate",
+      "color": "Pale reddish-brown, fading to pinkish-grey",
+      "surface": "Striate, slightly hygrophanous"
+    },
+    "gills": {
+      "attachment": "Adnate",
+      "color": "Whitish with reddish-brown edges",
+      "spacing": "Close"
+    },
+    "stem": {
+      "length_cm": 6.0,
+      "diameter_mm": 2,
+      "color": "Dark reddish-brown",
+      "features": "Covered in fine white hairs at the base, exudes a dark red latex when cut."
+    },
+    "sporePrint": {
+      "color": "White",
+      "notes": "Spore print obtained successfully on black paper after 8 hours."
+    }
+  },
+  "chemicalTestResults": {
+    "KOH_on_cap": "No significant reaction",
+    "FeSO4_on_flesh": "No reaction"
+  },
+  "notes": "Specimen was found in a cluster of approximately 15 fruiting bodies. The characteristic 'bleeding' of red latex was immediately apparent upon handling the stem. Odor is faint and non-distinctive. A tissue sample has been taken for DNA sequencing."
+}
+```

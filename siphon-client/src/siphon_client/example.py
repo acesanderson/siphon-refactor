@@ -15,21 +15,16 @@ from pathlib import Path
 import os
 
 ASSETS_DIR = Path(os.getenv("BC")) / "siphon" / "assets"
-assert ASSETS_DIR.exists(), f"Assets directory does not exist: {ASSETS_DIR}"
 EXAMPLE_MP3 = ASSETS_DIR / "example.mp3"
-assert EXAMPLE_MP3.exists(), f"Example MP3 file does not exist: {EXAMPLE_MP3}"
 EXAMPLE_WAV = ASSETS_DIR / "example.wav"
-assert EXAMPLE_WAV.exists(), f"Example WAV file does not exist: {EXAMPLE_WAV}"
 EXAMPLE_PDF = ASSETS_DIR / "basic-text.pdf"
-assert EXAMPLE_PDF.exists(), f"Example PDF file does not exist: {EXAMPLE_PDF}"
 EXAMPLE_BIG_PDF = ASSETS_DIR / "large-doc.pdf"
-assert EXAMPLE_BIG_PDF.exists(), (
-    f"Example big PDF file does not exist: {EXAMPLE_BIG_PDF}"
-)
 EXAMPLE_MARKDOWN = ASSETS_DIR / "example.md"
-assert EXAMPLE_MARKDOWN.exists(), (
-    f"Example Markdown file does not exist: {EXAMPLE_MARKDOWN}"
-)
+EXAMPLE_CSV = ASSETS_DIR / "example.csv"
+EXAMPLE_HTML = ASSETS_DIR / "example.html"
+EXAMPLE_TOML = ASSETS_DIR / "example.toml"
+EXAMPLE_TXT = ASSETS_DIR / "example.txt"
+EXAMPLE_YAML = ASSETS_DIR / "example.yaml"
 
 EXAMPLES = {
     "mp3": EXAMPLE_MP3,
@@ -37,4 +32,12 @@ EXAMPLES = {
     "pdf": EXAMPLE_PDF,
     "big_pdf": EXAMPLE_BIG_PDF,
     "markdown": EXAMPLE_MARKDOWN,
+    "csv": EXAMPLE_CSV,
+    "html": EXAMPLE_HTML,
+    "toml": EXAMPLE_TOML,
+    "txt": EXAMPLE_TXT,
+    "yaml": EXAMPLE_YAML,
 }
+
+for path in EXAMPLES.values():
+    assert path.exists(), f"Required test asset not found: {path}"

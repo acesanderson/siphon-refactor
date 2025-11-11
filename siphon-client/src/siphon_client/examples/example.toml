@@ -1,0 +1,57 @@
+# Configuration for the Aetheric Resonance Harmonizer, Model 7-Gamma
+# Project: Operation Sundial
+# Last Modified: 2381-07-19 by Dr. Aris Thorne
+
+device_id = "ARH-7G-0042"
+location = "Observatory Prime, Ganymede"
+is_active = true
+primary_operator = "Dr. Elara Vance"
+calibration_date = 2277-11-01T08:30:00Z
+supported_frequencies = [ 1.21, 5.54, 9.87, 14.20 ] # Gigahertz
+
+[power_core]
+type = "Miniature Singularity"
+output_terawatts = 15.5
+stability_index = 0.9987
+coolant_type = "Superfluid Helium-4"
+emergency_shutdown_enabled = true
+core_temperature_kelvin = 0.001
+
+# Settings for the primary resonance chamber
+[resonance_chamber]
+material = "Crystalline Nth-Metal Alloy"
+geometry = "Icosahedral"
+harmonic_drift_tolerance = 0.0002 # Percentage
+dampening_fields = [ "gravitonic", "magnetic_monopole", "subspace" ]
+description = """
+The heart of the harmonizer. It manipulates the local fabric of spacetime
+by resonating with extradimensional aetheric frequencies. Handle with
+extreme caution. Unauthorized modifications are a level-9 offense.
+"""
+
+# Configuration for individual emitter nodes
+[[emitter_node]]
+id = "EN-Alpha-1"
+position_vector = [1.0, 0.0, 0.0]
+phase_shift = 0.0 # Radians
+operational_status = "Nominal"
+last_diagnostic = 2277-10-28T15:00:00Z
+
+[[emitter_node]]
+id = "EN-Beta-5"
+position_vector = [0.0, -0.866, 0.5]
+phase_shift = 2.094 # Radians
+operational_status = "Nominal"
+
+[[emitter_node]]
+id = "EN-Gamma-9"
+position_vector = [0.0, 0.866, 0.5]
+phase_shift = 4.188 # Radians
+operational_status = "Awaiting recalibration"
+flags = ["minor_flux_instability"]
+
+[logging]
+level = "INFO"
+path = "/var/log/arh-7g/main.log"
+rotation_size_mb = 1024
+remote_syslog_enabled = false
