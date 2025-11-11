@@ -1,3 +1,4 @@
+from siphon_server.config import settings
 from siphon_api.interfaces import EnricherStrategy
 from siphon_api.models import ContentData, EnrichedData
 from siphon_api.enums import SourceType
@@ -24,7 +25,7 @@ logging.getLogger().setLevel(logging.CRITICAL + 10)
 
 # Constants
 PROMPTS_DIR = Path(__file__).parent / "prompts"
-PREFERRED_MODEL = "haiku"
+PREFERRED_MODEL = settings.default_model
 VERBOSITY = Verbosity.COMPLETE
 
 
@@ -59,7 +60,7 @@ class ArticleEnricher(EnricherStrategy):
         logger.info(f"Generated summary: {summary[:100]}...")
         prompt_strings.extend([description, summary])
         # Run the chain
-        model = ModelAsync(model="haiku")
+        model = ModelAsync(model=PREFERRED_MODEL)
         conduit = AsyncConduit(model=model)
         responses = conduit.run(prompt_strings=prompt_strings, verbose=VERBOSITY)
         assert all(isinstance(r, Response) for r in responses), (

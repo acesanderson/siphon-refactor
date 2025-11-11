@@ -1,3 +1,4 @@
+from siphon_server.config import settings
 from siphon_api.interfaces import EnricherStrategy
 from siphon_api.models import ContentData, EnrichedData
 from siphon_api.enums import SourceType
@@ -8,7 +9,6 @@ import logging
 # Import necessary classes from conduit; consider lazy imports in future.
 from conduit.batch import (
     AsyncConduit,
-    Prompt,
     ModelAsync,
     Response,
     Verbosity,
@@ -22,7 +22,7 @@ CACHE = ConduitCache(name="siphon")
 ModelAsync.conduit_cache = CACHE
 # Constants
 PROMPTS_DIR = Path(__file__).parent / "prompts"
-PREFERRED_MODEL = "haiku"
+PREFERRED_MODEL = settings.default_model
 VERBOSITY = Verbosity.COMPLETE
 
 
