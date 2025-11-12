@@ -170,13 +170,16 @@ class SiphonPipeline:
         logger.info(f"Parsed source info: {source_info}")
 
         # Check repository
-        if REPOSITORY.exists(source_info.uri):
-            logger.info(
-                f"Content already exists in repository for URI: {source_info.uri}"
-            )
-            existing_content = REPOSITORY.get(source_info.uri)
-            if existing_content:
-                return existing_content
+        if use_cache:
+            if REPOSITORY.exists(source_info.uri):
+                logger.info(
+                    f"Content already exists in repository for URI: {source_info.uri}"
+                )
+                existing_content = REPOSITORY.get(source_info.uri)
+                if existing_content:
+                    return existing_content
+        else:
+            logger.debug("Cache usage disabled; proceeding without repository check.")
 
         # Step 2: Extract content
         content_data = self.extractor.execute(source_info)
@@ -198,10 +201,13 @@ class SiphonPipeline:
         logger.info(f"Processed content assembled.")
 
         # Store in repository
-        REPOSITORY.set(result)
-        logger.info(
-            f"Processed content stored in repository for URI: {source_info.uri}"
-        )
+        if use_cache:
+            REPOSITORY.set(result)
+            logger.info(
+                f"Processed content stored in repository for URI: {source_info.uri}"
+            )
+        else:
+            logger.debug("Cache usage disabled; not storing in repository.")
 
         return result
 

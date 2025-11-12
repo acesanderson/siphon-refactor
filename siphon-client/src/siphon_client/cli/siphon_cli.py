@@ -52,7 +52,9 @@ def cli(source: str, return_type: Literal["s", "c", "d", "t", "m"], no_cache: bo
     """
     logger.info(f"Received source: {source}")
     source = parse_source(source)
-    request: SiphonRequest = create_siphon_request(source=source, no_cache=no_cache)
+    request: SiphonRequest = create_siphon_request(
+        source=source, use_cache=not no_cache
+    )  # Note the double negative for no_cache
     logger.debug("Loading HeadwaterClient")
     client = HeadwaterClient()
     logger.info("Processing request")

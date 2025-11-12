@@ -20,7 +20,7 @@ def determine_origin(source: str) -> SourceOrigin:
     raise ValueError("Source must be either a valid absolute file path or a valid URL.")
 
 
-def create_siphon_request_from_file(file_path: Path, no_cache: bool) -> SiphonRequest:
+def create_siphon_request_from_file(file_path: Path, use_cache: bool) -> SiphonRequest:
     """
     Create a SiphonRequest object from a file path.
     Needs to be (1) an absolute path and (2) a valid file.
@@ -42,11 +42,11 @@ def create_siphon_request_from_file(file_path: Path, no_cache: bool) -> SiphonRe
         source=str(file_path.resolve()),
         origin=SourceOrigin.FILE_PATH,
         file=siphon_file,
-        cached=not no_cache,
+        use_cache=use_cache,
     )
 
 
-def create_siphon_request_from_url(url: str, no_cache: bool) -> SiphonRequest:
+def create_siphon_request_from_url(url: str, use_cache: bool) -> SiphonRequest:
     """
     Create a SiphonRequest object from a URL.
     """
@@ -55,11 +55,11 @@ def create_siphon_request_from_url(url: str, no_cache: bool) -> SiphonRequest:
         source=url,
         origin=SourceOrigin.URL,
         file=None,
-        cached=not no_cache,
+        use_cache=use_cache,
     )
 
 
-def create_siphon_request(source: str | Path, no_cache: bool) -> SiphonRequest:
+def create_siphon_request(source: str | Path, use_cache: bool) -> SiphonRequest:
     """
     Create a SiphonRequest object from either a file path or a URL.
     """
@@ -70,6 +70,6 @@ def create_siphon_request(source: str | Path, no_cache: bool) -> SiphonRequest:
     origin = determine_origin(source)
     match origin:
         case SourceOrigin.FILE_PATH:
-            return create_siphon_request_from_file(Path(source), no_cache)
+            return create_siphon_request_from_file(Path(source), use_cache)
         case SourceOrigin.URL:
-            return create_siphon_request_from_url(source, no_cache)
+            return create_siphon_request_from_url(source, use_cache)
