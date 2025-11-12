@@ -48,7 +48,13 @@ class ArticleEnricher(EnricherStrategy):
     @override
     def enrich(self, content: ContentData) -> EnrichedData:
         logger.info("Enriching Article content")
-        input_variables = {"text": content.text, "metadata": content.metadata}
+        # Input variables
+        text = content.text
+        metadata = content.metadata
+        _ = content.metadata.pop(
+            "raw_text", None
+        )  # This is duplicative of content.text
+        input_variables = {"text": text, "metadata": metadata}
         source_type = SourceType.ARTICLE
         title = content.metadata["title"]
         logger.info(f"Generated title: {title}")
