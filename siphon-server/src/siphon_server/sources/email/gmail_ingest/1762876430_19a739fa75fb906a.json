@@ -1,0 +1,146 @@
+{
+  "id": "19a739fa75fb906a",
+  "threadId": "19a739fa75fb906a",
+  "labelIds": [
+    "Label_8491726436545534625",
+    "CATEGORY_PERSONAL"
+  ],
+  "snippet": "hi from proton body Sent with Proton Mail secure email.",
+  "payload": {
+    "partId": "",
+    "mimeType": "multipart/alternative",
+    "filename": "",
+    "headers": [
+      {
+        "name": "Delivered-To",
+        "value": "brian.briananderson@gmail.com"
+      },
+      {
+        "name": "Received",
+        "value": "by 2002:a05:7208:b010:b0:bc:344:588f with SMTP id z16csp4139737rba;        Tue, 11 Nov 2025 07:53:54 -0800 (PST)"
+      },
+      {
+        "name": "X-Google-Smtp-Source",
+        "value": "AGHT+IEnk6a1jSFYoPJZYYgkVly55RNtOrWosr7sIhwflgIAfXO/ss1WU+22d4MuZlNFCRr2zK9L"
+      },
+      {
+        "name": "X-Received",
+        "value": "by 2002:a05:690c:7603:b0:783:697a:5daa with SMTP id 00721157ae682-787d5399f2amr97814297b3.30.1762876434374;        Tue, 11 Nov 2025 07:53:54 -0800 (PST)"
+      },
+      {
+        "name": "ARC-Seal",
+        "value": "i=1; a=rsa-sha256; t=1762876434; cv=none;        d=google.com; s=arc-20240605;        b=itDpMQZLVnIkl8OqLAnUYjqb+9pt2MaFbhVvivJYLG4cpaEupMKmChcptYFTEuV+aM         efwXAv80wcrAxPiwxyUe6k0ijuhAws8Df7o1BJED2zRyZN/JQKPk/oB3DYWWnJRUW20u         ruCNzceEDP6DnCvJYDcY43H0sKQk9BdFyBPOfhFLaunezDNdv6XdcBT0e9kIsHxUbKqh         HM60BmbBeexf5egGrtSuQuHwYkcaAwN6rOTflXljkBqmxYCDo7+Hb/Q78J88OJzcsGpz         A3MsKWCAsacMxtvcBLa9//CfC8QPvBzWyt8/+KgM6+2/1KhbnL7/0Eoxxzy8FpQdE7CG         nctw=="
+      },
+      {
+        "name": "ARC-Message-Signature",
+        "value": "i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;        h=mime-version:feedback-id:message-id:subject:from:to:date         :dkim-signature;        bh=wokoTPlswaXYa5ykEv2DqaYsf4blFJ9ik0f9Ho/fFs0=;        fh=MUoQoKPVjNzFKKwFW+mxgpYKVw2XsO+81bCGszB+m4o=;        b=VNT6mKLhWkDfMNLBHseA/1c2tygygaAj7sjkUynXu/fRD705xBZ4Fuk9DMMCQanOwd         kJ0uwiW2HTYy+hsuIE01XZBcTSrhm2uJlKZ7f2ijJHNXqiqhxjNGy1fwd779pB5XiKeJ         WlvorQ8gkgzaNS0vrbDrZi9H0PYPT67noDrtg9m6+6VjwiprCVy7YHI/MUlaecU+N5HT         PnOggryrICrTz/q14s/60Fmt/4KJ80roFxA8VjavmrAh1HIW6Ka1PrScUjtidVZP/4PA         SpqdbgwxCQLHh0T9cZMvbiKAgXzvwxdnE9ytZevxXSqwvVpi57TMVuuGkmsjEitCMAgN         bgiA==;        dara=google.com"
+      },
+      {
+        "name": "ARC-Authentication-Results",
+        "value": "i=1; mx.google.com;       dkim=pass header.i=@proton.me header.s=protonmail header.b=F2wi7UcZ;       spf=pass (google.com: domain of byzantiumdolphin@proton.me designates 109.224.244.28 as permitted sender) smtp.mailfrom=byzantiumdolphin@proton.me;       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=proton.me"
+      },
+      {
+        "name": "Return-Path",
+        "value": "<byzantiumdolphin@proton.me>"
+      },
+      {
+        "name": "Received",
+        "value": "from mail-24428.protonmail.ch (mail-24428.protonmail.ch. [109.224.244.28])        by mx.google.com with ESMTPS id 00721157ae682-7880e7e24f7si4383337b3.299.2025.11.11.07.53.54        for <brian.briananderson@gmail.com>        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);        Tue, 11 Nov 2025 07:53:54 -0800 (PST)"
+      },
+      {
+        "name": "Received-SPF",
+        "value": "pass (google.com: domain of byzantiumdolphin@proton.me designates 109.224.244.28 as permitted sender) client-ip=109.224.244.28;"
+      },
+      {
+        "name": "Authentication-Results",
+        "value": "mx.google.com;       dkim=pass header.i=@proton.me header.s=protonmail header.b=F2wi7UcZ;       spf=pass (google.com: domain of byzantiumdolphin@proton.me designates 109.224.244.28 as permitted sender) smtp.mailfrom=byzantiumdolphin@proton.me;       dmarc=pass (p=QUARANTINE sp=QUARANTINE dis=NONE) header.from=proton.me"
+      },
+      {
+        "name": "DKIM-Signature",
+        "value": "v=1; a=rsa-sha256; c=relaxed/relaxed; d=proton.me; s=protonmail; t=1762876433; x=1763135633; bh=wokoTPlswaXYa5ykEv2DqaYsf4blFJ9ik0f9Ho/fFs0=; h=Date:To:From:Subject:Message-ID:Feedback-ID:From:To:Cc:Date:\t Subject:Reply-To:Feedback-ID:Message-ID:BIMI-Selector; b=F2wi7UcZU7f8+nr4I9UMyxK4DSCFKC33c8ioz4AeS4UmpMGeh6Kkykta9g5kE7GVQ\t IAy1HPnNpZJZu6EJ/zCQ/95nvuJlJZU5xOLukQ11h8gwO0x3XpJ1z/feUsItNVul5A\t coKFlI/2eGW7WVvf3Yz+9WTh9jz1IjME0C+euM+dKBkniXYGPmgvUJFnE6OS3S6RHq\t BijrjV5bUc2ABl0VbomU2vrzIRvJRqeFlv0hAwsiVuerZMSGsipHvsyWoqF4IsIQNO\t tgBtEz2fvkOF6+woV6O2Ni5+YHmC13k0V6yIsGBPEObCrE7/MZXk3HjUsdhJqdPs/k\t 7A+QnPn/M9zcw=="
+      },
+      {
+        "name": "Date",
+        "value": "Tue, 11 Nov 2025 15:53:50 +0000"
+      },
+      {
+        "name": "To",
+        "value": "\"brian.briananderson@gmail.com\" <brian.briananderson@gmail.com>"
+      },
+      {
+        "name": "From",
+        "value": "byzantiumdolphin <byzantiumdolphin@proton.me>"
+      },
+      {
+        "name": "Subject",
+        "value": "hi from proton"
+      },
+      {
+        "name": "Message-ID",
+        "value": "<DAgPwLKRtOpYx2HCg0uMqyslGGs1Em9xWGbJXpdTdjXxMmpmZB4Yy8f6ocJEifhvCwaHrV_45XPszxIWowMSk7JWVJX2PKufg5mOtzURLos=@proton.me>"
+      },
+      {
+        "name": "Feedback-ID",
+        "value": "139620805:user:proton"
+      },
+      {
+        "name": "X-Pm-Message-ID",
+        "value": "b2934d56c89390c38190d42e97fb5aa4a8a41895"
+      },
+      {
+        "name": "MIME-Version",
+        "value": "1.0"
+      },
+      {
+        "name": "Content-Type",
+        "value": "multipart/alternative; boundary=\"b1=_ult9trvhEos5x9KVC7gcvZOHtQXbnv0rwIInDQqqNM\""
+      }
+    ],
+    "body": {
+      "size": 0
+    },
+    "parts": [
+      {
+        "partId": "0",
+        "mimeType": "text/plain",
+        "filename": "",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/plain; charset=utf-8"
+          },
+          {
+            "name": "Content-Transfer-Encoding",
+            "value": "base64"
+          }
+        ],
+        "body": {
+          "size": 87,
+          "data": "aGkgZnJvbSBwcm90b24gYm9keQoKU2VudCB3aXRoIFtQcm90b24gTWFpbF0oaHR0cHM6Ly9wcm90b24ubWUvbWFpbC9ob21lKSBzZWN1cmUgZW1haWwu"
+        }
+      },
+      {
+        "partId": "1",
+        "mimeType": "text/html",
+        "filename": "",
+        "headers": [
+          {
+            "name": "Content-Type",
+            "value": "text/html; charset=utf-8"
+          },
+          {
+            "name": "Content-Transfer-Encoding",
+            "value": "base64"
+          }
+        ],
+        "body": {
+          "size": 564,
+          "data": "PGRpdiBzdHlsZT0iZm9udC1mYW1pbHk6IEFyaWFsLCBzYW5zLXNlcmlmOyBmb250LXNpemU6IDE0cHg7Ij5oaSBmcm9tIHByb3RvbiBib2R5PC9kaXY-PGRpdiBzdHlsZT0iZm9udC1mYW1pbHk6IEFyaWFsLCBzYW5zLXNlcmlmOyBmb250LXNpemU6IDE0cHg7Ij48YnI-PC9kaXY-DQo8ZGl2IHN0eWxlPSJmb250LWZhbWlseTogQXJpYWwsIHNhbnMtc2VyaWY7IGZvbnQtc2l6ZTogMTRweDsiIGNsYXNzPSJwcm90b25tYWlsX3NpZ25hdHVyZV9ibG9jayI-DQogICAgPGRpdiBjbGFzcz0icHJvdG9ubWFpbF9zaWduYXR1cmVfYmxvY2stdXNlciBwcm90b25tYWlsX3NpZ25hdHVyZV9ibG9jay1lbXB0eSI-DQogICAgICAgIA0KICAgICAgICAgICAgPC9kaXY-DQogICAgDQogICAgICAgICAgICA8ZGl2IGNsYXNzPSJwcm90b25tYWlsX3NpZ25hdHVyZV9ibG9jay1wcm90b24iPg0KICAgICAgICBTZW50IHdpdGggPGEgaHJlZj0iaHR0cHM6Ly9wcm90b24ubWUvbWFpbC9ob21lIiB0YXJnZXQ9Il9ibGFuayI-UHJvdG9uIE1haWw8L2E-IHNlY3VyZSBlbWFpbC4NCiAgICA8L2Rpdj4NCjwvZGl2Pg0K"
+        }
+      }
+    ]
+  },
+  "sizeEstimate": 5327,
+  "historyId": "26406161",
+  "internalDate": "1762876430000"
+}

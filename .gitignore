@@ -14,3 +14,5 @@ __pycache__/
 .venv
 uv.lock
 assets/
+/siphon-server/src/siphon_server/sources/email/client_secret.json
+
