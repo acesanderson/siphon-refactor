@@ -40,13 +40,19 @@ def parse_source(source: str) -> str:
     default="s",
     help="Type of data to return: [s]ummary, [c]ontent, [d]escription, [t]itle, [m]etadata",
 )
-def cli(source: str, return_type: Literal["s", "c", "d", "t", "m"]):
+@click.option(
+    "--no-cache",
+    is_flag=True,
+    default=False,
+    help="Disable caching for this request",
+)
+def cli(source: str, return_type: Literal["s", "c", "d", "t", "m"], no_cache: bool):
     """
     Process a source (file, URL, etc.)
     """
     logger.info(f"Received source: {source}")
     source = parse_source(source)
-    request: SiphonRequest = create_siphon_request(source)
+    request: SiphonRequest = create_siphon_request(source=source, no_cache=no_cache)
     logger.debug("Loading HeadwaterClient")
     client = HeadwaterClient()
     logger.info("Processing request")

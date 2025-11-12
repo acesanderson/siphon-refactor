@@ -97,6 +97,10 @@ class SiphonRequest(BaseModel):
         default=None,
         description="File bytes and metadata; required for FILE_PATH origin.",
     )
+    cached: bool = Field(
+        default=True,
+        description="Whether caching is enabled for this request.",
+    )
 
     @model_validator(mode="after")
     def validate_consistency(self):
