@@ -5,6 +5,7 @@ from siphon_api.models import (
     EnrichedData,
     PipelineClass,
 )
+from siphon_api.enums import ActionType
 from siphon_api.interfaces import (
     ParserStrategy,
     ExtractorStrategy,
@@ -177,7 +178,7 @@ class SiphonPipeline:
     def process(
         self,
         source: str,
-        action: Literal["parse", "extract", "enrich", "gulp"] = "gulp",
+        action: ActionType = ActionType.GULP,
         use_cache: bool = True,
     ) -> PipelineClass:
         """
@@ -198,7 +199,7 @@ class SiphonPipeline:
         # Step 1: Parse source
         source_info = self.parser.execute(source)
         logger.info(f"Parsed source info: {source_info}")
-        if action == "parse":
+        if action == ActionType.PARSE:
             return source_info
 
         # Check repository
@@ -207,22 +208,30 @@ class SiphonPipeline:
                 logger.info(
                     f"Content already exists in repository for URI: {source_info.uri}"
                 )
-                existing_content = REPOSITORY.get(source_info.uri)
+                existing_content: ProcessedContent | None = REPOSITORY.get(
+                    source_info.uri
+                )
                 if existing_content:
-                    return existing_content
+                    match action:
+                        case ActionType.EXTRACT:
+                            return existing_content.content
+                        case ActionType.ENRICH:
+                            return existing_content.enrichment
+                        case ActionType.GULP:
+                            return existing_content
         else:
             logger.debug("Cache usage disabled; proceeding without repository check.")
 
         # Step 2: Extract content
         content_data = self.extractor.execute(source_info)
         logger.info(f"Extracted content data: {content_data}")
-        if action == "extract":
+        if action == ActionType.EXTRACT:
             return content_data
 
         # Step 3: Enrich with LLM
         enriched_data = self.enricher.execute(content_data)
         logger.info(f"Enriched data: {enriched_data}")
-        if action == "enrich":
+        if action == ActionType.ENRICH:
             return enriched_data
 
         # Step 4: Assemble result
@@ -244,5 +253,9 @@ class SiphonPipeline:
             )
         else:
             logger.debug("Cache usage disabled; not storing in repository.")
+
+        assert action == ActionType.GULP, (
+            "Action must be GULP at this stage, suggests error in code."
+        )
 
         return result

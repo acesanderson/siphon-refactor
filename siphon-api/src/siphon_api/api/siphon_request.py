@@ -1,4 +1,4 @@
-from siphon_api.enums import SourceOrigin
+from siphon_api.enums import SourceOrigin, ActionType
 from siphon_api.file_types import EXTENSIONS
 from pydantic import (
     BaseModel,
@@ -27,7 +27,7 @@ def is_absolute_path(p: str) -> bool:
 
 
 class SiphonRequestParams(BaseModel):
-    action: Literal["gulp", "parse", "extract", "enrich"] = Field(
+    action: ActionType = Field(
         ...,
         description="Action to perform on the source.",
     )

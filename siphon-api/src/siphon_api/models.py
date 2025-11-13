@@ -8,9 +8,7 @@ class SourceInfo(BaseModel):
     Parsed source metadata. Replaces all URI subclasses.
     """
 
-    kind: Literal["SourceInfo", "ContentData", "EnrichedData", "ProcessedContent"] = (
-        "SourceInfo"  # Discriminator
-    )
+    kind: Literal["SourceInfo"] = "SourceInfo"  # Discriminator
 
     source_type: SourceType
     uri: str  # Canonical identifier (e.g., "youtube:///dQw4w9WgXcQ")
@@ -23,9 +21,7 @@ class ContentData(BaseModel):
     Extracted content. Replaces all Context subclasses.
     """
 
-    kind: Literal["SourceInfo", "ContentData", "EnrichedData", "ProcessedContent"] = (
-        "ContentData"  # Discriminator
-    )
+    kind: Literal["ContentData"] = "ContentData"  # Discriminator
 
     source_type: SourceType
     text: str  # The actual content (transcript, article text, file contents)
@@ -37,9 +33,7 @@ class EnrichedData(BaseModel):
     AI-generated enrichments. Replaces all SyntheticData subclasses.
     """
 
-    kind: Literal["SourceInfo", "ContentData", "EnrichedData", "ProcessedContent"] = (
-        "EnrichedData"  # Discriminator
-    )
+    kind: Literal["EnrichedData"] = "EnrichedData"  # Discriminator
 
     source_type: SourceType
     title: str = ""
@@ -54,9 +48,7 @@ class ProcessedContent(BaseModel):
     Final aggregate - main output of Siphon pipeline.
     """
 
-    kind: Literal["SourceInfo", "ContentData", "EnrichedData", "ProcessedContent"] = (
-        "ProcessedContent"  # Discriminator
-    )
+    kind: Literal["ProcessedContent"] = "ProcessedContent"  # Discriminator
 
     source: SourceInfo
     content: ContentData

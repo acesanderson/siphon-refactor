@@ -18,3 +18,10 @@ class SourceType(str, Enum):
     # OBSIDIAN = "Obsidian"
     # DRIVE = "Drive"
     # EMAIL = "Email"
+
+
+class ActionType(str, Enum):
+    GULP = "gulp"
+    PARSE = "parse"
+    EXTRACT = "extract"
+    ENRICH = "enrich"

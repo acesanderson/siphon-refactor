@@ -2,6 +2,7 @@ from headwater_client.client.headwater_client import HeadwaterClient
 from siphon_api.api.siphon_request import SiphonRequest, SiphonRequestParams
 from siphon_api.api.to_siphon_request import create_siphon_request
 from siphon_api.api.siphon_response import SiphonResponse
+from siphon_api.enums import ActionType
 from siphon_api.models import (
     SourceInfo,
     ContentData,
@@ -52,7 +53,7 @@ def siphon():
 @click.option(
     "--return-type",
     "-r",
-    type=Literal["st", "u", "c", "m", "t", "d", "s", "pc"],
+    type=click.Choice(["st", "u", "c", "m", "t", "d", "s", "pc"]),
     default="s",
     help="Type to return: [st] source type, [u] URI, [c] content, [m] metadata, [t] title, [d] description, [s] summary, [pc] processed content.",
 )
@@ -73,9 +74,8 @@ def gulp(
     """
     logger.info(f"Received source: {source}")
     source = parse_source(source)
-    requested_object = ProcessedContent.kind
     params: SiphonRequestParams = SiphonRequestParams(
-        action="gulp", return_type=requested_object, use_cache=not no_cache
+        action=ActionType.GULP, use_cache=not no_cache
     )
     request: SiphonRequest = create_siphon_request(
         source=source,
@@ -117,6 +117,8 @@ def gulp(
             output_string = payload.summary
         case "pc":
             output_json = payload.model_dump_json(indent=2)
+        case _:
+            raise ValueError(f"Unsupported return type: {return_type}")
     # Print output
     if output_string:
         output_string += "\n\n-----------------------------------------"
@@ -131,7 +133,7 @@ def gulp(
 @click.option(
     "--return-type",
     "-r",
-    type=Literal["u", "st"],
+    type=click.Choice(["u", "st"]),
     default="u",
     help="Type to return: [u] URI, [st] source type.",
 )
@@ -141,10 +143,8 @@ def parse(source: str, return_type: Literal["u", "st"]):
     """
     logger.info(f"Received source for parsing: {source}")
     source = parse_source(source)
-    requested_object = SourceInfo.kind
     params: SiphonRequestParams = SiphonRequestParams(
-        action="parse",
-        return_type=requested_object,
+        action=ActionType.PARSE,
     )
     request: SiphonRequest = create_siphon_request(
         source=source,
@@ -178,7 +178,7 @@ def parse(source: str, return_type: Literal["u", "st"]):
 @click.option(
     "--return-type",
     "-r",
-    type=Literal["c", "m"],
+    type=click.Choice(["c", "m"]),
     default="c",
     help="Type to return: [c]ontent, [m]etadata.",
 )
@@ -188,10 +188,8 @@ def extract(source: str, return_type: Literal["c", "m"]):
     """
     logger.info(f"Received source for extraction: {source}")
     source = parse_source(source)
-    requested_object = ContentData.kind
     params: SiphonRequestParams = SiphonRequestParams(
-        action="extract",
-        return_type=requested_object,
+        action=ActionType.EXTRACT,
     )
     request: SiphonRequest = create_siphon_request(
         source=source,
@@ -227,7 +225,7 @@ def extract(source: str, return_type: Literal["c", "m"]):
 @click.option(
     "--return-type",
     "-r",
-    type=Literal["s", "d", "t"],
+    type=click.Choice(["s", "d", "t"]),
     default="s",
     help="Type to return: [s]ummary, [d]escription, [t]itle.",
 )
@@ -239,8 +237,7 @@ def enrich(source: str, return_type: Literal["s", "d", "t"]):
     source = parse_source(source)
     requested_object = EnrichedData.kind
     params: SiphonRequestParams = SiphonRequestParams(
-        action="enrich",
-        return_type=requested_object,
+        action=ActionType.ENRICH,
     )
     request: SiphonRequest = create_siphon_request(
         source=source,
