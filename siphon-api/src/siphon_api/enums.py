@@ -13,7 +13,6 @@ class SourceType(str, Enum):
     AUDIO = "Audio"
     # IMAGE = "Image"
     # VIDEO = "Video"
-    # TEXT = "Text"
     # GITHUB = "GitHub"
     # REDDIT = "Reddit"
     # OBSIDIAN = "Obsidian"

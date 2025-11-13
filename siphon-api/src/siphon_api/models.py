@@ -8,6 +8,8 @@ class SourceInfo(BaseModel):
     Parsed source metadata. Replaces all URI subclasses.
     """
 
+    kind: str = "SourceInfo"  # Discriminator
+
     source_type: SourceType
     uri: str  # Canonical identifier (e.g., "youtube:///dQw4w9WgXcQ")
     original_source: str  # User input (e.g., "https://youtube.com/watch?v=dQw4w9WgXcQ")
@@ -19,6 +21,8 @@ class ContentData(BaseModel):
     Extracted content. Replaces all Context subclasses.
     """
 
+    kind: str = "ContentData"  # Discriminator
+
     source_type: SourceType
     text: str  # The actual content (transcript, article text, file contents)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -28,6 +32,8 @@ class EnrichedData(BaseModel):
     """
     AI-generated enrichments. Replaces all SyntheticData subclasses.
     """
+
+    kind: str = "EnrichedData"  # Discriminator
 
     source_type: SourceType
     title: str = ""
@@ -42,6 +48,8 @@ class ProcessedContent(BaseModel):
     Final aggregate - main output of Siphon pipeline.
     """
 
+    kind: str = "ProcessedContent"  # Discriminator
+
     source: SourceInfo
     content: ContentData
     enrichment: EnrichedData
@@ -51,8 +59,20 @@ class ProcessedContent(BaseModel):
 
     # Convenience properties
     @property
+    def source_type(self) -> str:
+        return self.source.source_type
+
+    @property
     def uri(self) -> str:
         return self.source.uri
+
+    @property
+    def text(self) -> str:
+        return self.content.text
+
+    @property
+    def metadata(self) -> dict[str, Any]:
+        return self.content.metadata
 
     @property
     def title(self) -> str:
@@ -63,9 +83,10 @@ class ProcessedContent(BaseModel):
         return self.enrichment.description
 
     @property
-    def text(self) -> str:
-        return self.content.text
-
-    @property
     def summary(self) -> str:
         return self.enrichment.summary
+
+
+PipelineClass = (
+    ProcessedContent | ContentData | EnrichedData | SourceInfo
+)  # Hence our discriminator field 'kind'
