@@ -1,5 +1,5 @@
 from headwater_client.client.headwater_client import HeadwaterClient
-from siphon_api.api.siphon_request import SiphonRequest
+from siphon_api.api.siphon_request import SiphonRequest, SiphonRequestParams
 from siphon_api.api.to_siphon_request import create_siphon_request
 from siphon_api.models import ProcessedContent
 from pathlib import Path
@@ -29,12 +29,6 @@ def parse_source(source: str) -> str:
     except Exception:
         logger.debug(f"Source is not a file path: {source}")
         return source
-
-
-def cli(source: str, return_type: Literal["s", "c", "d", "t", "m"], no_cache: bool):
-    """
-    Process a source (file, URL, etc.)
-    """
 
 
 @click.group()
@@ -67,8 +61,12 @@ def gulp(source: str, return_type: Literal["s", "c", "d", "t", "m"], no_cache: b
     """
     logger.info(f"Received source: {source}")
     source = parse_source(source)
+    params: SiphonRequestParams = SiphonRequestParams(
+        action="gulp", use_cache=not no_cache
+    )
     request: SiphonRequest = create_siphon_request(
-        source=source, use_cache=not no_cache
+        source=source,
+        request_params=params,
     )  # Note the double negative for no_cache
     logger.debug("Loading HeadwaterClient")
     client = HeadwaterClient()
