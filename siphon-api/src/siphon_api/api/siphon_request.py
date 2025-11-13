@@ -1,5 +1,5 @@
 from siphon_api.enums import SourceOrigin
-from siphon_api.file_types import EXTENSIONS, get_mime_type
+from siphon_api.file_types import EXTENSIONS
 from pydantic import (
     BaseModel,
     Field,
@@ -9,6 +9,7 @@ from pydantic import (
 )
 from urllib.parse import urlparse
 from pathlib import PurePosixPath
+from typing import Literal
 import base64
 import hashlib
 import hmac
@@ -25,12 +26,26 @@ def is_absolute_path(p: str) -> bool:
     return bool(re.match(r"^(?:[a-zA-Z]:\\|\\\\)", p))
 
 
+class SiphonRequestParams(BaseModel):
+    action: Literal["gulp", "parse", "extract", "enrich"] = Field(
+        ...,
+        description="Action to perform on the source.",
+    )
+    return_type: Literal["c", "m", "t", "s", "d"] | None = Field(
+        default=None,
+        description="c=content, m=metadata, t=title, s=summary, d=description",
+    )
+    use_cache: bool = Field(
+        default=True,
+        description="Whether caching is enabled for this request.",
+    )
+
+
 class SiphonFile(BaseModel):
     data: bytes = Field(
         ..., description="Raw file bytes; JSON transport may be base64."
     )
     checksum: str = Field(..., description="SHA256 hex digest of raw bytes.")
-    mime_type: str = Field(..., description="MIME type of the file content.")
     extension: str = Field(..., description="File extension, e.g., '.pdf', '.txt'.")
 
     @field_validator("data", mode="before")
@@ -77,15 +92,6 @@ class SiphonFile(BaseModel):
             )
         return self
 
-    @model_validator(mode="after")
-    def validate_mime_type(self):
-        expected = get_mime_type(extension=self.extension)
-        if expected and self.mime_type.lower() != expected.lower():
-            raise ValueError(
-                f"MIME type '{self.mime_type}' does not match expected '{expected}' for extension '{self.extension}'"
-            )
-        return self
-
 
 class SiphonRequest(BaseModel):
     source: str = Field(
@@ -93,13 +99,14 @@ class SiphonRequest(BaseModel):
         description="Source string — absolute file path or URL, depending on origin.",
     )
     origin: SourceOrigin = Field(..., description="Either URL or FILE_PATH.")
+    params: SiphonRequestParams = Field(
+        ..., description="Parameters for the siphon request."
+    )
+
+    # Optional file payload for FILE_PATH origin
     file: SiphonFile | None = Field(
         default=None,
         description="File bytes and metadata; required for FILE_PATH origin.",
-    )
-    use_cache: bool = Field(
-        default=True,
-        description="Whether caching is enabled for this request.",
     )
 
     @model_validator(mode="after")

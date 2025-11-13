@@ -31,7 +31,21 @@ def parse_source(source: str) -> str:
         return source
 
 
-@click.command()
+def cli(source: str, return_type: Literal["s", "c", "d", "t", "m"], no_cache: bool):
+    """
+    Process a source (file, URL, etc.)
+    """
+
+
+@click.group()
+def siphon():
+    """
+    Process, persist, or extract content from various sources.
+    """
+    ...
+
+
+@siphon.command()
 @click.argument("source")
 @click.option(
     "--return-type",
@@ -46,9 +60,10 @@ def parse_source(source: str) -> str:
     default=False,
     help="Disable caching for this request",
 )
-def cli(source: str, return_type: Literal["s", "c", "d", "t", "m"], no_cache: bool):
+def gulp(source: str, return_type: Literal["s", "c", "d", "t", "m"], no_cache: bool):
     """
-    Process a source (file, URL, etc.)
+    Process a source and persist the results (e.g., DB, embeddings).
+    This is also an importable function for programmatic use (if you want a ProcessedContent object).
     """
     logger.info(f"Received source: {source}")
     source = parse_source(source)
@@ -93,8 +108,49 @@ def cli(source: str, return_type: Literal["s", "c", "d", "t", "m"], no_cache: bo
         console.print(output_json)
 
 
+@siphon.command()
+@click.argument("source")
+def parse(source: str):
+    """
+    Parse a source and return the resolved URI (ephemeral).
+    """
+    ...
+
+
+@siphon.command()
+@click.argument("source")
+@click.option(
+    "--return-type",
+    "-r",
+    type=click.Choice(["c", "m", "t"]),
+    default="c",
+    help="Type to return: [c]ontent, [m]etadata, [t]okens.",
+)
+def extract(source: str, return_type: Literal["c", "m", "t"]):
+    """
+    Extract content from a source without persisting (ephemeral).
+    """
+    ...
+
+
+@siphon.command()
+@click.argument("source")
+@click.option(
+    "--return-type",
+    "-r",
+    type=click.Choice(["s", "d", "t"]),
+    default="s",
+    help="Type to return: [s]ummary, [d]escription, [t]itle.",
+)
+def enrich(source: str, return_type: Literal["s", "d", "t"]):
+    """
+    Enrich a source without persisting (ephemeral).
+    """
+    ...
+
+
 def main():
-    cli()
+    siphon()
 
 
 if __name__ == "__main__":
