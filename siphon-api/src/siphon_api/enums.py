@@ -21,7 +21,8 @@ class SourceType(str, Enum):
 
 
 class ActionType(str, Enum):
-    GULP = "gulp"
     PARSE = "parse"
     EXTRACT = "extract"
+    TOKENIZE = "tokenize"
     ENRICH = "enrich"
+    GULP = "gulp"
