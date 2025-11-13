@@ -40,6 +40,17 @@ def parse_source(source: str) -> str:
         return source
 
 
+def print_output(output_string: str):
+    output_string = "\n\n-----------------------------------------\n\n" + output_string
+    output_string += "\n\n-----------------------------------------"
+    from rich.console import Console
+    from rich.markdown import Markdown
+
+    console = Console()
+    output = Markdown(output_string)
+    console.print(output)
+
+
 @click.group()
 def siphon():
     """
@@ -90,11 +101,6 @@ def gulp(
         f"Expected ProcessedContent, got {type(payload)}"
     )
     logger.info("Processing complete")
-    # Display output based on return_type
-    from rich.console import Console
-    from rich.markdown import Markdown
-
-    console = Console()
     # Prepare output -- either string or JSON
     output_string = ""
     output_json = ""
@@ -121,10 +127,11 @@ def gulp(
             raise ValueError(f"Unsupported return type: {return_type}")
     # Print output
     if output_string:
-        output_string += "\n\n-----------------------------------------"
-        output = Markdown(output_string)
-        console.print(output)
+        print_output(output_string)
     if output_json:
+        from rich.console import Console
+
+        console = Console()
         console.print(output_json)
 
 
@@ -158,19 +165,13 @@ def parse(source: str, return_type: Literal["u", "st"]):
     assert isinstance(payload, SourceInfo), f"Expected SourceInfo, got {type(payload)}"
     logger.info("Processing complete")
     # Display output based on return_type
-    from rich.console import Console
-    from rich.markdown import Markdown
-
-    console = Console()
     match return_type:
         case "u":
             output_string = payload.uri
         case "st":
             output_string = payload.source_type
 
-    output_string += "\n\n-----------------------------------------"
-    output = Markdown(output_string)
-    console.print(output)
+    print_output(output_string)
 
 
 @siphon.command()
@@ -205,17 +206,14 @@ def extract(source: str, return_type: Literal["c", "m"]):
     )
     logger.info("Processing complete")
     # Display output based on return_type
-    from rich.console import Console
-    from rich.markdown import Markdown
-
-    console = Console()
     match return_type:
         case "c":
-            output_string = payload.text
-            output_string += "\n\n-----------------------------------------"
-            output = Markdown(output_string)
-            console.print(output)
+            print_output(payload.text)
         case "m":
+            from rich.console import Console
+            from rich.markdown import Markdown
+
+            console = Console()
             output_json = json.dumps(payload.metadata, indent=2)
             console.print(output_json)
 
@@ -235,7 +233,6 @@ def enrich(source: str, return_type: Literal["s", "d", "t"]):
     """
     logger.info(f"Received source for enrichment: {source}")
     source = parse_source(source)
-    requested_object = EnrichedData.kind
     params: SiphonRequestParams = SiphonRequestParams(
         action=ActionType.ENRICH,
     )
@@ -257,6 +254,7 @@ def enrich(source: str, return_type: Literal["s", "d", "t"]):
     from rich.markdown import Markdown
 
     console = Console()
+
     match return_type:
         case "s":
             output_string = payload.summary
@@ -265,9 +263,7 @@ def enrich(source: str, return_type: Literal["s", "d", "t"]):
         case "t":
             output_string = payload.title
 
-    output_string += "\n\n-----------------------------------------"
-    output = Markdown(output_string)
-    console.print(output)
+    print_output(output_string)
 
 
 def main():
