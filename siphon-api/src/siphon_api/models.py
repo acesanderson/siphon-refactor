@@ -59,7 +59,7 @@ class ProcessedContent(BaseModel):
 
     # Convenience properties
     @property
-    def source_type(self) -> str:
+    def source_type(self) -> SourceType:
         return self.source.source_type
 
     @property

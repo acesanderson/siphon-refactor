@@ -1,4 +1,4 @@
-from siphon_api.enums import SourceOrigin, ReturnType
+from siphon_api.enums import SourceOrigin
 from siphon_api.file_types import EXTENSIONS
 from pydantic import (
     BaseModel,
@@ -30,10 +30,6 @@ class SiphonRequestParams(BaseModel):
     action: Literal["gulp", "parse", "extract", "enrich"] = Field(
         ...,
         description="Action to perform on the source.",
-    )
-    return_type: ReturnType | None = Field(
-        default=None,
-        description=ReturnType.__doc__,
     )
     use_cache: bool = Field(
         default=True,

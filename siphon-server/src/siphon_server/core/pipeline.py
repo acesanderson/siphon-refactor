@@ -1,4 +1,10 @@
-from siphon_api.models import ProcessedContent, SourceInfo, ContentData, EnrichedData
+from siphon_api.models import (
+    ProcessedContent,
+    SourceInfo,
+    ContentData,
+    EnrichedData,
+    PipelineClass,
+)
 from siphon_api.interfaces import (
     ParserStrategy,
     ExtractorStrategy,
@@ -7,6 +13,7 @@ from siphon_api.interfaces import (
 from siphon_server.database.postgres.repository import ContentRepository
 from siphon_server.sources.registry import load_registry, generate_registry
 from siphon_api.enums import SourceType
+from typing import Literal
 import time
 
 import logging
@@ -158,16 +165,41 @@ class SiphonPipeline:
     def __init__(
         self,
     ):
+        """
+        Initialize the SiphonPipeline with the specified action.
+        The action is the offramp to stop the pipeline at a specific step.
+        """
         logger.info("Initializing SiphonPipeline.")
         self.parser = SourceParser()
         self.extractor = ContentExtractor()
         self.enricher = ContentEnricher()
-        # self.cache = SiphonCache()
 
-    def process(self, source: str, use_cache: bool = True) -> ProcessedContent:
+    def process(
+        self,
+        source: str,
+        action: Literal["parse", "extract", "enrich", "gulp"] = "gulp",
+        use_cache: bool = True,
+    ) -> PipelineClass:
+        """
+        Process a source through the Siphon ingestion pipeline with optional early exit.
+
+        Orchestrates a four-stage pipeline: parse source to SourceInfo, extract content
+        to ContentData, enrich with LLM to EnrichedData, and assemble final ProcessedContent.
+        Supports early termination at any stage via the action parameter. Optionally checks
+        the repository cache to avoid reprocessing duplicate URIs.
+
+        Returns:
+        PipelineClass: One of SourceInfo, ContentData, EnrichedData, or ProcessedContent
+        depending on action parameter. Cached ProcessedContent if use_cache=True
+        and URI already exists in repository.
+        """
+        if action not in ["parser", "extractor", "enricher", "gulp"]:
+            raise ValueError(f"Invalid action: {action}")
         # Step 1: Parse source
         source_info = self.parser.execute(source)
         logger.info(f"Parsed source info: {source_info}")
+        if action == "parse":
+            return source_info
 
         # Check repository
         if use_cache:
@@ -184,10 +216,14 @@ class SiphonPipeline:
         # Step 2: Extract content
         content_data = self.extractor.execute(source_info)
         logger.info(f"Extracted content data: {content_data}")
+        if action == "extract":
+            return content_data
 
         # Step 3: Enrich with LLM
         enriched_data = self.enricher.execute(content_data)
         logger.info(f"Enriched data: {enriched_data}")
+        if action == "enrich":
+            return enriched_data
 
         # Step 4: Assemble result
         result = ProcessedContent(
@@ -198,7 +234,7 @@ class SiphonPipeline:
             created_at=int(time.time()),
             updated_at=int(time.time()),
         )
-        logger.info(f"Processed content assembled.")
+        logger.info("Processed content assembled.")
 
         # Store in repository
         if use_cache:
@@ -210,16 +246,3 @@ class SiphonPipeline:
             logger.debug("Cache usage disabled; not storing in repository.")
 
         return result
-
-
-if __name__ == "__main__":
-    from siphon_server.example import EXAMPLES
-
-    examples = [EXAMPLES["pdf"], EXAMPLES["mp3"], EXAMPLES["wav"]]
-
-    for index, source in enumerate(examples):
-        print(f"\n--- Processing Example {index + 1} ---")
-        pipeline = SiphonPipeline()
-        processed_content = pipeline.process(str(source))
-        print(f"Processed content for source: {source}")
-        print(processed_content)
