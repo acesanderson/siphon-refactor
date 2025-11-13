@@ -14,7 +14,6 @@ from siphon_api.interfaces import (
 from siphon_server.database.postgres.repository import ContentRepository
 from siphon_server.sources.registry import load_registry, generate_registry
 from siphon_api.enums import SourceType
-from typing import Literal
 import time
 
 import logging
@@ -194,8 +193,6 @@ class SiphonPipeline:
         depending on action parameter. Cached ProcessedContent if use_cache=True
         and URI already exists in repository.
         """
-        if action not in ["parser", "extractor", "enricher", "gulp"]:
-            raise ValueError(f"Invalid action: {action}")
         # Step 1: Parse source
         source_info = self.parser.execute(source)
         logger.info(f"Parsed source info: {source_info}")
