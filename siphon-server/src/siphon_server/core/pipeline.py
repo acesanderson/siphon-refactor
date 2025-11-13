@@ -225,13 +225,21 @@ class SiphonPipeline:
         if action == ActionType.EXTRACT:
             return content_data
 
-        # Step 3: Enrich with LLM
+        # Step 3: Grab tokens (optional)
+        if action == ActionType.TOKENIZE:
+            from siphon_server.core.count_tokens import count_tokens
+
+            token_count = count_tokens(content_data)
+            content_data.token_count = token_count
+            return content_data
+
+        # Step 4: Enrich with LLM
         enriched_data = self.enricher.execute(content_data)
         logger.info(f"Enriched data: {enriched_data}")
         if action == ActionType.ENRICH:
             return enriched_data
 
-        # Step 4: Assemble result
+        # Step 5: Assemble result
         result = ProcessedContent(
             source=source_info,
             content=content_data,

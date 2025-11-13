@@ -27,6 +27,10 @@ class ContentData(BaseModel):
     text: str  # The actual content (transcript, article text, file contents)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    token_count: int | None = (
+        None  # Optional token count (specifically requested as an ActionType in pipeline)
+    )
+
 
 class EnrichedData(BaseModel):
     """

@@ -179,11 +179,11 @@ def parse(source: str, return_type: Literal["u", "st"]):
 @click.option(
     "--return-type",
     "-r",
-    type=click.Choice(["c", "m"]),
+    type=click.Choice(["c", "m", "to"]),
     default="c",
-    help="Type to return: [c]ontent, [m]etadata.",
+    help="Type to return: [c]ontent, [m]etadata, [to]ken_count.",
 )
-def extract(source: str, return_type: Literal["c", "m"]):
+def extract(source: str, return_type: Literal["c", "m", "to"]):
     """
     Extract content from a source without persisting (ephemeral).
     """
@@ -209,6 +209,8 @@ def extract(source: str, return_type: Literal["c", "m"]):
     match return_type:
         case "c":
             print_output(payload.text)
+        case "to":
+            print_output(str(payload.token_count))
         case "m":
             from rich.console import Console
             from rich.markdown import Markdown
@@ -249,12 +251,6 @@ def enrich(source: str, return_type: Literal["s", "d", "t"]):
         f"Expected EnrichedData, got {type(payload)}"
     )
     logger.info("Processing complete")
-    # Display output based on return_type
-    from rich.console import Console
-    from rich.markdown import Markdown
-
-    console = Console()
-
     match return_type:
         case "s":
             output_string = payload.summary
