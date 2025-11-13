@@ -1,3 +1,7 @@
+"""
+Add a "test" option which uses a sample asset.
+"""
+
 from headwater_client.client.headwater_client import HeadwaterClient
 from siphon_api.api.siphon_request import SiphonRequest, SiphonRequestParams
 from siphon_api.api.to_siphon_request import create_siphon_request
@@ -189,9 +193,13 @@ def extract(source: str, return_type: Literal["c", "m", "to"]):
     """
     logger.info(f"Received source for extraction: {source}")
     source = parse_source(source)
-    params: SiphonRequestParams = SiphonRequestParams(
-        action=ActionType.EXTRACT,
-    )
+    # Two possible actions here
+    if return_type == "to":
+        action = ActionType.TOKENIZE
+    else:
+        action = ActionType.EXTRACT
+    # Build request
+    params: SiphonRequestParams = SiphonRequestParams(action=action)
     request: SiphonRequest = create_siphon_request(
         source=source,
         request_params=params,
@@ -210,6 +218,7 @@ def extract(source: str, return_type: Literal["c", "m", "to"]):
         case "c":
             print_output(payload.text)
         case "to":
+            assert payload.token_count > 0, "Returned token count is 0."
             print_output(str(payload.token_count))
         case "m":
             from rich.console import Console
