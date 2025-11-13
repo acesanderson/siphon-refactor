@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from siphon_api.enums import SourceType
-from typing import Any
+from typing import Any, Literal
 
 
 class SourceInfo(BaseModel):
@@ -8,7 +8,9 @@ class SourceInfo(BaseModel):
     Parsed source metadata. Replaces all URI subclasses.
     """
 
-    kind: str = "SourceInfo"  # Discriminator
+    kind: Literal["SourceInfo", "ContentData", "EnrichedData", "ProcessedContent"] = (
+        "SourceInfo"  # Discriminator
+    )
 
     source_type: SourceType
     uri: str  # Canonical identifier (e.g., "youtube:///dQw4w9WgXcQ")
@@ -21,7 +23,9 @@ class ContentData(BaseModel):
     Extracted content. Replaces all Context subclasses.
     """
 
-    kind: str = "ContentData"  # Discriminator
+    kind: Literal["SourceInfo", "ContentData", "EnrichedData", "ProcessedContent"] = (
+        "ContentData"  # Discriminator
+    )
 
     source_type: SourceType
     text: str  # The actual content (transcript, article text, file contents)
@@ -33,7 +37,9 @@ class EnrichedData(BaseModel):
     AI-generated enrichments. Replaces all SyntheticData subclasses.
     """
 
-    kind: str = "EnrichedData"  # Discriminator
+    kind: Literal["SourceInfo", "ContentData", "EnrichedData", "ProcessedContent"] = (
+        "EnrichedData"  # Discriminator
+    )
 
     source_type: SourceType
     title: str = ""
@@ -48,7 +54,9 @@ class ProcessedContent(BaseModel):
     Final aggregate - main output of Siphon pipeline.
     """
 
-    kind: str = "ProcessedContent"  # Discriminator
+    kind: Literal["SourceInfo", "ContentData", "EnrichedData", "ProcessedContent"] = (
+        "ProcessedContent"  # Discriminator
+    )
 
     source: SourceInfo
     content: ContentData
