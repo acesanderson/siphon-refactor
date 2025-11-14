@@ -11,12 +11,12 @@ class SourceType(str, Enum):
     YOUTUBE = "YouTube"
     ARTICLE = "Article"
     AUDIO = "Audio"
+    DRIVE = "Drive"
     # IMAGE = "Image"
     # VIDEO = "Video"
     # GITHUB = "GitHub"
     # REDDIT = "Reddit"
     # OBSIDIAN = "Obsidian"
-    # DRIVE = "Drive"
     # EMAIL = "Email"
 
 
