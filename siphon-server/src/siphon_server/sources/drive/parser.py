@@ -58,9 +58,3 @@ class DriveParser(ParserStrategy):
             original_source=source,
             hash=hash,
         )
-
-
-if __name__ == "__main__":
-    example_source = "https://docs.google.com/document/d/1a2b3c4d5e6f7g8h9i0j/edit"
-    parser = DriveParser()
-    source_info = parser.parse(example_source)
