@@ -19,4 +19,6 @@ assets/
 /siphon-server/src/siphon_server/sources/email/gmail_ingest/1762876430_19a739fa75fb906a.json
 /siphon-server/src/siphon_server/sources/email/gmail_ingest/1762877144_19a73aa8cec4ce4b.json
 /siphon-server/src/siphon_server/sources/email/gmail_ingest/1762877349_19a73adb7bd010ca.json
+/siphon-server/src/siphon_server/sources/drive/pipeline/client_secret.json
+/siphon-server/src/siphon_server/sources/drive/pipeline/.service_credentials.json
 

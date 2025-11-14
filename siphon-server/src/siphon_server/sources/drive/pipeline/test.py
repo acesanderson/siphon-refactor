@@ -8,10 +8,8 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-
-# Imports from Drive script
-# (siphon_server imports removed)
 from siphon_server.sources.drive.pipeline.drive_type import DriveType
+from pathlib import Path
 
 # --- Logging Setup (from Gmail script) ---
 log_level = int(os.getenv("PYTHON_LOG_LEVEL", "2"))
@@ -23,11 +21,28 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# --- Configuration (from Gmail script) ---
-_ = load_dotenv()  # Load .env file, ignore return value
+
+DRIVE_TYPE_MAPPING = {
+    DriveType.DOCS: {
+        "scope": "https://www.googleapis.com/auth/documents.readonly",
+        "service": "docs",
+    },
+    DriveType.SHEETS: {
+        "scope": "https://www.googleapis.com/auth/spreadsheets.readonly",
+        "service": "sheets",
+    },
+    DriveType.SLIDES: {
+        "scope": "https://www.googleapis.com/auth/presentations.readonly",
+        "service": "slides",
+    },
+    DriveType.FORMS: {
+        "scope": "https://www.googleapis.com/auth/forms.responses.readonly",
+        "service": "forms",
+    },
+}
+
 
 CLIENT_SECRET_FILE = "client_secret.json"
-# TOKEN_FILE = "token.json" # This will be dynamic in the function
 
 
 def get_google_service(service_name: str, service_version: str, scopes: list[str]):
@@ -101,16 +116,16 @@ def get_google_service(service_name: str, service_version: str, scopes: list[str
 
 # This main execution block is from your *first* (Drive) script
 if __name__ == "__main__":
-    # doc = "https://docs.google.com/document/d/1L4rwvx5P33LbPcX2dawSYrE2Z38yXwBBRaPVJakHozU/edit?tab=t.0"
-    sheet_url = "https://docs.google.com/spreadsheets/d/1H7QTl1F7rJsVkCHtUyIzk1RSGnpyzZZf5nVNhRQdmyw/edit?gid=0#gid=0"
+    doc = "https://docs.google.com/document/d/1L4rwvx5P33LbPcX2dawSYrE2Z38yXwBBRaPVJakHozU/edit?tab=t.0"
+    # sheet_url = "https://docs.google.com/spreadsheets/d/1H7QTl1F7rJsVkCHtUyIzk1RSGnpyzZZf5nVNhRQdmyw/edit?gid=0#gid=0"
 
     # Simplified parsing. This assumes your siphon_server logic is not used
     # for authentication, only for type/ID extraction.
     # If DriveParser.parse() is complex, this will need adjustment.
 
     # A simple way to get the ID and type without the parser:
-    file_id = sheet_url.split("/d/")[1].split("/")[0]
-    file_type = DriveType("sheets")  # Hard-coded based on URL
+    file_id = doc.split("/d/")[1].split("/")[0]
+    file_type = DriveType("docs")  # Hard-coded based on URL
 
     # This replaces the `DriveParser` and `parser.get_drive_service`
     service = get_google_service(
