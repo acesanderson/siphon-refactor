@@ -12,12 +12,13 @@ class SourceType(str, Enum):
     ARTICLE = "Article"
     AUDIO = "Audio"
     DRIVE = "Drive"
+    # EMAIL = "Email"
     # IMAGE = "Image"
     # VIDEO = "Video"
     # GITHUB = "GitHub"
     # REDDIT = "Reddit"
     # OBSIDIAN = "Obsidian"
-    # EMAIL = "Email"
+    # LLM_CHATS = "LLM_Chats"
 
 
 class ActionType(str, Enum):
