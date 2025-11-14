@@ -22,3 +22,4 @@ siphon-server/src/siphon_server/sources/email/gmail_ingest/1762877349_19a73adb7b
 siphon-server/src/siphon_server/sources/drive/pipeline/client_secret.json
 siphon-server/src/siphon_server/sources/drive/pipeline/.service_credentials.json
 siphon-server/src/siphon_server/sources/drive/pipeline/sheets_token.json
+*_token.json

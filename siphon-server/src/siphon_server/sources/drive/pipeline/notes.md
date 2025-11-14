@@ -5,6 +5,8 @@
 - it's set to "Testing".
 - you need to add yourself as a test user (within APIs & Services > OAuth consent screen > Audience) to be able to authenticate.
 
+TODO: handle secrets!
+
 
 Two areas to figure out for these scripts:
 - auth
