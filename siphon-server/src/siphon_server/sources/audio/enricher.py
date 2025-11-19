@@ -43,7 +43,9 @@ class AudioEnricher(EnricherStrategy):
         print(f"Loaded prompts: {self.prompt_loader.keys}")
 
     @override
-    def enrich(self, content: ContentData) -> EnrichedData:
+    def enrich(
+        self, content: ContentData, preferred_model: str = PREFERRED_MODEL
+    ) -> EnrichedData:
         """
         Enrich audio transcript content with LLM-generated metadata.
 
@@ -81,7 +83,7 @@ class AudioEnricher(EnricherStrategy):
         logger.info(f"Generated summary prompt")
         prompt_strings.extend([description_prompt_str, summary_prompt_str])
         # Run the chain
-        model = ModelAsync(model=PREFERRED_MODEL)
+        model = ModelAsync(model=preferred_model)
         conduit = AsyncConduit(model=model)
         responses = conduit.run(prompt_strings=prompt_strings, verbose=VERBOSITY)
         assert all(isinstance(r, Response) for r in responses), (
@@ -91,7 +93,7 @@ class AudioEnricher(EnricherStrategy):
         summary = str(responses[1].content)
         # Generate title from description; this is sync.
         title_prompt_str = title_prompt.render({"description": description})
-        model_sync = Model(model=PREFERRED_MODEL)
+        model_sync = Model(model=preferred_model)
         response = model_sync.query(query_input=title_prompt_str, verbose=VERBOSITY)
         assert isinstance(response, Response), "Title response must be of type Response"
         title = str(response.content)

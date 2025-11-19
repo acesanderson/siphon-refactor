@@ -46,7 +46,9 @@ class ArticleEnricher(EnricherStrategy):
         print(f"Loaded prompts: {self.prompt_loader.keys}")
 
     @override
-    def enrich(self, content: ContentData) -> EnrichedData:
+    def enrich(
+        self, content: ContentData, preferred_model: str = PREFERRED_MODEL
+    ) -> EnrichedData:
         logger.info("Enriching Article content")
         # Input variables
         text = content.text
@@ -66,7 +68,7 @@ class ArticleEnricher(EnricherStrategy):
         logger.info(f"Generated summary: {summary[:100]}...")
         prompt_strings.extend([description, summary])
         # Run the chain
-        model = ModelAsync(model=PREFERRED_MODEL)
+        model = ModelAsync(model=preferred_model)
         conduit = AsyncConduit(model=model)
         responses = conduit.run(prompt_strings=prompt_strings, verbose=VERBOSITY)
         assert all(isinstance(r, Response) for r in responses), (

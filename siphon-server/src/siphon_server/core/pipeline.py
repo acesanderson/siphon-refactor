@@ -13,6 +13,7 @@ from siphon_api.interfaces import (
 )
 from siphon_server.database.postgres.repository import ContentRepository
 from siphon_server.sources.registry import load_registry, generate_registry
+from siphon_server.config import load_settings
 from siphon_api.enums import SourceType
 import time
 
@@ -24,6 +25,8 @@ logger = logging.getLogger(__name__)
 
 REGISTRY: list[str] = load_registry()
 REPOSITORY = ContentRepository()
+SETTINGS = load_settings()
+PREFERRED_MODEL = SETTINGS.default_model
 
 
 class SourceParser:
@@ -144,7 +147,9 @@ class ContentEnricher:
                 enrichers.append(enricher)
         return enrichers
 
-    def execute(self, content_data: ContentData) -> EnrichedData:
+    def execute(
+        self, content_data: ContentData, preferred_model: str = PREFERRED_MODEL
+    ) -> EnrichedData:
         logger.debug("Executing ContentEnricher.")
         source_type = content_data.source_type
         for enricher in self.enrichers:
@@ -153,7 +158,9 @@ class ContentEnricher:
                     "Using enricher {enricher.__name__} for source type: {source_type}"
                 )
                 enricher_obj = enricher()
-                return enricher_obj.enrich(content=content_data)
+                return enricher_obj.enrich(
+                    content=content_data, preferred_model=preferred_model
+                )
 
 
 class SiphonPipeline:
@@ -179,6 +186,7 @@ class SiphonPipeline:
         source: str,
         action: ActionType = ActionType.GULP,
         use_cache: bool = True,
+        preferred_model: str = PREFERRED_MODEL,
     ) -> PipelineClass:
         """
         Process a source through the Siphon ingestion pipeline with optional early exit.
@@ -234,7 +242,7 @@ class SiphonPipeline:
             return content_data
 
         # Step 4: Enrich with LLM
-        enriched_data = self.enricher.execute(content_data)
+        enriched_data = self.enricher.execute(content_data, preferred_model)
         logger.info(f"Enriched data: {enriched_data}")
         if action == ActionType.ENRICH:
             return enriched_data

@@ -29,8 +29,9 @@ class EnricherStrategy(Protocol):
     """
     Interface for content enrichment strategies.
     (summarization approaches will differ for different content types)
+    Note: this takes an optional preferred_model parameter to allow for model selection.
     """
 
     source_type: SourceType
 
-    def enrich(self, content: ContentData) -> EnrichedData: ...
+    def enrich(self, content: ContentData, preferred_model: str) -> EnrichedData: ...
