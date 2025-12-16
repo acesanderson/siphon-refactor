@@ -1,0 +1,20 @@
+# FILE: flux_sidecar/docker-compose.yml
+services:
+  flux-sidecar:
+    build: .
+    runtime: nvidia
+    environment:
+      - HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}
+      - HF_HOME=/root/.cache/huggingface
+    volumes:
+      # CRITICAL: Map host HF cache to container to persist weights
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    ports:
+      - "8001:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
