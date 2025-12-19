@@ -1,43 +1,78 @@
-# FILE: flux_sidecar/main.py
 import asyncio
 import torch
 import io
 import os
+import logging
 from fastapi import FastAPI, Response, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from contextlib import asynccontextmanager
-from diffusers import Flux2Pipeline
+from huggingface_hub import snapshot_download
 from pydantic import BaseModel
+
+# --- UPDATED IMPORTS ---
+from transformers import BitsAndBytesConfig
+from diffusers import FluxPipeline, FluxTransformer2DModel
+# -----------------------
+
+# Logging setup
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("flux_loader")
 
 # Global state
 pipe = None
-gpu_lock = asyncio.Lock()  # Prevent simultaneous GPU access
+gpu_lock = asyncio.Lock()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global pipe
-    print("Initializing FLUX.2-dev sidecar...")
 
-    # Check for Hugging Face Token
-    if not os.getenv("HUGGINGFACEHUB_API_TOKEN"):
-        print("WARNING: HUGGINGFACEHUB_API_TOKEN is not set. Model download may fail.")
+    # NOTE: Ensure this matches what you actually have access to.
+    # Standard public model is "black-forest-labs/FLUX.1-dev"
+    model_id = "black-forest-labs/FLUX.1-dev"
 
     try:
-        print("Loading model weights... (This happens once)")
-        # FLUX.2-dev is the specific model you asked for
-        pipe = Flux2Pipeline.from_pretrained(
-            "black-forest-labs/FLUX.2-dev", torch_dtype=torch.bfloat16
+        logger.info(f"--- STEP 1: CHECKING/DOWNLOADING WEIGHTS FOR {model_id} ---")
+        model_path = snapshot_download(
+            repo_id=model_id,
+            repo_type="model",
+            token=os.getenv("HUGGINGFACEHUB_API_TOKEN"),
         )
-        # Move to GPU. 32GB VRAM on 5090 is massive, so we can keep it fully loaded.
-        pipe.to("cuda")
-        print("FLUX.2-dev loaded and ready on RTX 5090.")
+        logger.info(f"Download complete. Model cached at: {model_path}")
+
+        logger.info("--- STEP 2: LOADING QUANTIZED TRANSFORMER ---")
+
+        # 1. Define the 8-bit config
+        quant_config = BitsAndBytesConfig(
+            load_in_8bit=True,
+            # optional: llm_int8_threshold=6.0
+        )
+
+        # 2. Load ONLY the heavy Transformer in 8-bit
+        # This keeps the text encoders in high precision (bfloat16) for quality
+        transformer = FluxTransformer2DModel.from_pretrained(
+            model_path,
+            subfolder="transformer",
+            quantization_config=quant_config,
+            torch_dtype=torch.bfloat16,
+        )
+
+        logger.info("--- STEP 3: ASSEMBLING PIPELINE ---")
+        # 3. Load the rest of the pipeline, injecting the 8-bit transformer
+        pipe = FluxPipeline.from_pretrained(
+            model_path, transformer=transformer, torch_dtype=torch.bfloat16
+        )
+
+        # 4. Use CPU Offload (It works perfectly with 8-bit components)
+        pipe.enable_model_cpu_offload()
+
+        logger.info("--- READY: MODEL LOADED (8-BIT TRANSFORMER) ---")
+
     except Exception as e:
-        print(f"CRITICAL ERROR loading model: {e}")
-        # We don't raise here so the container stays alive for debugging,
-        # but health checks will fail.
+        logger.error(f"CRITICAL FAILURE: {e}")
+
     yield
-    print("Shutting down...")
+    logger.info("Shutting down...")
 
 
 app = FastAPI(lifespan=lifespan)
@@ -70,7 +105,7 @@ async def generate_image(req: GenRequest):
         def _inference():
             generator = torch.Generator("cuda").manual_seed(req.seed)
             image = pipe(
-                req.prompt,
+                prompt=req.prompt,
                 height=req.height,
                 width=req.width,
                 num_inference_steps=req.steps,

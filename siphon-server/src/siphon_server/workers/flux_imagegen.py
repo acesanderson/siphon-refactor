@@ -17,8 +17,61 @@ verification of service health.
 from pathlib import Path
 import httpx
 import logging
+from jinja2 import Template
+import os
+from pathlib import Path
+
+NAS_DIR = os.getenv("NAS")
+assert NAS_DIR is not None, "Environment variable $NAS must be set."
+NAS_DIR_PATH = Path(NAS_DIR).resolve()
+IMAGES_DIR_PATH = NAS_DIR_PATH / "generated_images"
+IMAGES_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
 logger = logging.getLogger(__name__)
+
+system_prompt = Template("""
+SYSTEM PROMPT FOR E-INK–OPTIMIZED IMAGE GENERATION
+
+You are generating images intended for a low-power 800×480 monochrome e-ink display. The display renders only black or white pixels after thresholding, with no grayscale. Your outputs must be optimized to survive 1-bit conversion and dithering without becoming muddy, dark, or losing structure.
+
+Follow these rules:
+- Brightness & Tonal Range
+- Avoid low-key or dark images.
+- Maximize mid-tone and light regions so that major forms remain distinct when converted to pure black & white.
+- Avoid strong global darkening or moody lighting.
+
+Contrast & Edge Clarity
+
+- Emphasize clear silhouettes, crisp edges, and well-defined shapes.
+- Preserve detail using line-friendly structure rather than noise or texture.
+- Avoid heavy shadows and large dense black areas.
+
+Texture & Shading
+- Do not use photographic noise, grain, film look, or fine gradients.
+- Prefer flat lighting, soft shading, and large regions of clean tone.
+- Avoid tiny high-frequency textures that will turn to dithering speckles.
+
+Composition
+- Keep the subject uncluttered with intentional negative space.
+- Avoid busy backgrounds, fog effects, smoke, or visual clutter.
+- Ensure strong figure-ground separation.
+
+Style
+- Prefer illustration-like, poster-like, or simplified semi-realistic styles.
+- Avoid hyperrealism and complex lighting simulations.
+- Avoid deep shadows, backlighting, or high-contrast chiaroscuro.
+
+Output requirements
+- Final image should be visually interpretable at 800×480 and remain readable after 1-bit dithering.
+- Avoid color-dependent cues; assume all hue information will be discarded.
+
+Goal: Produce a bright, simplified, high-clarity image that retains structure when reduced to 1-bit black and white on an 800×480 e-ink screen.
+
+Here is the prompt to generate the image:
+<prompt>
+{{ prompt }}
+</prompt>
+""")
 
 # Note: Port 8001 to avoid conflict with the Diarization service (8000)
 FLUX_SERVICE_URL = "http://localhost:8001"
@@ -106,8 +159,42 @@ def generate_image(
         raise RuntimeError(f"Unexpected error during image generation: {e}")
 
 
-if __name__ == "__main__":
-    prompt = "a black and white woodcut in the style of albrecht durer"
-    output_path = Path("output/test_flux_image.png")
+def stem_the_prompt_for_filename(prompt: str) -> str:
+    """
+    Creates a filesystem-safe stem from the prompt for use in filenames.
+
+    Args:
+        prompt: The text description for the image.
+
+    Returns:
+        str: A sanitized string suitable for filenames.
+    """
+    import re
+
+    # Lowercase and replace spaces with underscores
+    stem = prompt.lower().replace(" ", "_")
+    # Remove non-alphanumeric characters except underscores
+    stem = re.sub(r"[^a-z0-9_]", "", stem)
+    # Truncate to a reasonable length
+    return stem[:50]
+
+
+def generate_raw_image(prompt: str) -> Path:
+    output_path = IMAGES_DIR_PATH / f"{stem_the_prompt_for_filename(prompt)}.png"
     result_path = generate_image(prompt, output_path)
-    print(f"Image generated at: {result_path}")
+    return result_path
+
+
+def generate_trmnl_image(prompt: str) -> Path:
+    output_path = IMAGES_DIR_PATH / f"{stem_the_prompt_for_filename(prompt)}.png"
+    complete_prompt = str(system_prompt.render(prompt=prompt))
+    result_path = generate_image(complete_prompt, output_path)
+    return result_path
+
+
+if __name__ == "__main__":
+    prompt = (
+        "A female barbarian fighting a gnoll in a dark forest, high detail, fantasy art"
+    )
+    path = generate_trmnl_image(prompt)
+    print(f"Generated image at: {path}")

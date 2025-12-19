@@ -4,7 +4,7 @@ services:
     build: .
     runtime: nvidia
     environment:
-      - HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}
+      - HUGGINGFACEHUB_API_TOKEN
       - HF_HOME=/root/.cache/huggingface
     volumes:
       # CRITICAL: Map host HF cache to container to persist weights

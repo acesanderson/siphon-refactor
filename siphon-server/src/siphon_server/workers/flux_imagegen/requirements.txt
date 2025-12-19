@@ -1,0 +1,23 @@
+# Core Frameworks
+# (Torch is handled in the base image/pre-step, but listing here is good documentation)
+# torch
+# torchvision
+# torchaudio
+
+# FLUX / Diffusers Stack
+transformers>=4.40.0
+accelerate>=0.30.0
+diffusers>=0.29.0
+safetensors
+sentencepiece
+protobuf
+huggingface_hub
+
+# Web API
+fastapi
+uvicorn
+python-multipart
+httpx
+
+# Optimization (Crucial for RTX 5090 / Flux)
+bitsandbytes>=0.43.0

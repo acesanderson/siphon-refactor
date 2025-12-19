@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  zimage-worker:
+    build: .
+    container_name: zimage-sidecar
+    ports:
+      - "8002:8002"
+    environment:
+      - HUGGINGFACEHUB_API_TOKEN
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Map host HF cache to container to persist model weights
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    # 'ipc: host' is often needed for PyTorch to avoid shared memory limits
+    ipc: host
+    restart: unless-stopped
