@@ -11,6 +11,7 @@ requires-python = ">=3.12"
 dependencies = [
     "pydantic",
     "pytest-watch>=4.2.0",
+    "headwater_client",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -19,3 +20,6 @@ sources = ["src"]
 
 [tool.hatch.build.targets.sdist]
 include = ["src/siphon_api/py.typed"]
+
+[tool.uv.sources]
+headwater_client = { path = "../../headwater/headwater-client", editable = true }
