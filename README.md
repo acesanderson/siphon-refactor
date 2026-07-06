@@ -1,204 +1,199 @@
 # Siphon
 
-_Semantic bookmarking for the agentic era_
-
-Siphon is a multi-source content ingestion and retrieval pipeline designed to transform heterogeneous data—YouTube videos, web articles, local documents, Obsidian vaults, and emails—into structured, searchable, and LLM-enriched knowledge.
-
-## Two Modes of Ingestion
-
-<p align="center">
-  <img src="snail_mollusk.png" alt="Snail and mollusk representing active and passive ingestion" width="300"/>
-</p>
-
-Siphon is built around two complementary ingestion patterns:
-
-- **Active ingestion (the snail)** — deliberate, on-demand capture. You encounter something worth keeping and explicitly pull it in: `siphon gulp <url>`. The snail moves with intention, carrying everything it has gathered.
-- **Passive ingestion (the mollusk)** — ambient, automatic absorption. Content flows through configured channels (email, vault syncs, scheduled crawls) and is filtered in without manual intervention. The mollusk sits open, drawing in whatever the current carries.
-
-Most knowledge pipelines optimize for one or the other. Siphon handles both.
-
-## Table of Contents
-- [Quick Start](#quick-start)
-- [Core Pipeline Architecture](#core-pipeline-architecture)
-- [Installation and Setup](#installation-and-setup)
-- [CLI Reference](#cli-reference)
-- [Supported Source Types](#supported-source-types)
-- [Configuration](#configuration)
+Siphon is a unified document and media ingestion engine with hybrid semantic search capabilities. It parses, extracts, and enriches unstructured content from diverse sources—including PDFs, web articles, raw audio, video, YouTube, GitHub repositories, and Obsidian vaults—and stores them as vector-enabled, highly structured records in a PostgreSQL database.
 
 ## Quick Start
 
+Siphon is organized as a Python monorepo managed with `uv`.
+
 ### Installation
-Install the Siphon packages using `uv` or `pip`:
 
-```bash
-# Install the client and server components
-pip install siphon-api siphon-client siphon-server
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourorg/siphon.git
+   cd siphon
+   ```
+
+2. Synchronize workspace dependencies:
+   ```bash
+   uv sync
+   ```
+
+3. Configure required environment variables:
+   ```bash
+   export POSTGRES_USERNAME="your_user"
+   export POSTGRES_PASSWORD="your_password"
+   export HUGGINGFACEHUB_API_TOKEN="your_hf_token"
+   ```
+
+4. Initialize the PostgreSQL schema and indexes:
+   ```bash
+   python -m siphon_server.database.postgres.setup
+   ```
+
+### Programmatic Usage
+
+Execute the core ingestion pipeline programmatically using Python async tasks:
+
+```python
+import asyncio
+from siphon_server.core.pipeline import SiphonPipeline
+from siphon_api.enums import ActionType
+
+async def main():
+    pipeline = SiphonPipeline()
+    
+    # Process, enrich, and persist a source document to PostgreSQL
+    result = await pipeline.process(
+        source="https://arxiv.org/abs/2301.07041",
+        action=ActionType.GULP,
+        use_cache=False
+    )
+    
+    print(f"Title: {result.enrichment.title}")
+    print(f"Summary:\n{result.enrichment.summary}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
-### Initial Ingestion
-Ingest a source (e.g., a YouTube video) to parse, extract, and enrich it using LLMs:
+### CLI Usage
+
+Ingest and semantically query content directly from the command line:
 
 ```bash
-siphon gulp "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+# Gulp a YouTube video (downloads metadata, retrieves transcripts, enriches, and stores)
+siphon gulp "https://www.youtube.com/watch?v=OkEGJ5G3foU"
+
+# Query the database using Hybrid RRF (BM25 Lexical + Cosine Semantic Search)
+siphon query "AI engineering tutorial" --mode hybrid
 ```
 
-### Retrieval
-Search for ingested content. The default search path is hybrid retrieval (RRF fusion of BM25 over the description-plus-summary tsvector, and semantic search over the nomic-embed-text-v1.5 vector index) with HyDE query expansion:
+---
+
+## Core Value Demonstration
+
+Siphon handles complex real-world media extraction and enrichment pipeline issues, such as rate-limiting bypasses, GPU-accelerated speaker diarization, visual asset descriptions, and hybrid indexing. 
+
+Below is a demonstration of processing heterogeneous data streams:
 
 ```bash
-siphon query "claude code subagents"
-```
-
-Common variants:
-
-```bash
-siphon query "ECW cliff routing" --mode semantic   # vector only
-siphon query "RoutingSummarizer"  --mode fts       # BM25 only
-siphon query "react useState"     --no-hyde -n 3   # skip HyDE, embed raw query
-siphon query "RAG eval"           --type youtube   # filter by source type
-```
-
-## Core Pipeline Architecture
-
-Siphon operates as an orchestrated pipeline consisting of four distinct stages. This modularity allows for specific offramps depending on the desired outcome (e.g., extracting text without persisting to the database).
-
-| Stage | Component | Input | Output |
-| :--- | :--- | :--- | :--- |
-| **1. Parse** | `SourceParser` | Raw String/URL | `SourceInfo` (Canonical URI) |
-| **2. Extract** | `ContentExtractor` | `SourceInfo` | `ContentData` (Raw Text + Metadata) |
-| **3. Enrich** | `ContentEnricher` | `ContentData` | `EnrichedData` (LLM Summary/Description) |
-| **4. Persist** | `Repository` | `ProcessedContent` | Database Record |
-
-### Action Types
-The CLI and API support early termination of the pipeline via the `--return-type` or `action` parameter:
-
-- `parse`: Resolves the source to a canonical URI.
-- `extract`: Returns raw text and metadata (ephemeral).
-- `enrich`: Returns LLM-generated summaries (ephemeral).
-- `gulp`: Executes the full pipeline and persists the result to PostgreSQL.
-
-## Installation and Setup
-
-### Prerequisites
-- **Python**: 3.12 or higher.
-- **Database**: PostgreSQL with the `pgvector` extension.
-- **LLM Access**: Configured `conduit` provider for enrichment.
-- **System Dependencies**: `ffmpeg` (for audio/video processing).
-
-### Environment Variables
-The following variables are required for database connectivity and external API access:
-
-| Variable | Description |
-| :--- | :--- |
-| `POSTGRES_USERNAME` | PostgreSQL user. |
-| `POSTGRES_PASSWORD` | PostgreSQL password. |
-| `HUGGINGFACEHUB_API_TOKEN` | Token for audio diarization and vision models. |
-| `YOUTUBE_API_KEY2` | Optional key for advanced YouTube metadata. |
-| `WEBSHARE_USERNAME` | Proxy username for YouTube transcript bypassing. |
-| `WEBSHARE_PASS` | Proxy password for YouTube transcript bypassing. |
-
-### Database Initialization
-Run the setup script to provision the schema:
-
-```bash
-python -m siphon_server.database.postgres.setup
-```
-
-## CLI Reference
-
-### Ingestion Commands
-
-#### gulp
-Processes a source and persists it to the database.
-```bash
-siphon gulp "path/to/document.pdf" --return-type s
-```
-
-#### sync
-Bulk ingests an Obsidian vault. It performs client-side change detection to only process new or significantly modified notes.
-```bash
+# 1. Sync an entire Obsidian vault with client-side mtime change detection
 siphon sync --vault ~/my-obsidian-vault --concurrency 10
+
+# 2. Extract content from a heavy PDF containing charts and tables using Docling + OCR
+siphon gulp /path/to/annual_report.pdf --return-type json
+
+# 3. Query across all processed sources with HyDE (Hypothetical Document Embeddings) enabled
+siphon query "Q3 revenue projections and visual charts description" --type doc --mode hybrid
+
+# 4. Recall last query index to display or open source references
+siphon query --get 1 --return-type s
 ```
 
-### Retrieval Commands
+---
 
-#### query
-Search the content database. Supports five modes:
+## Architecture Overview
 
-| Mode | Description | When to use |
+Siphon decouples processing into client commands, API exchange structures, and high-performance server processing pipelines.
+
+```
+                  ┌──────────────────────────────┐
+                  │          CLI Client          │
+                  └──────────────┬───────────────┘
+                                 │ SiphonRequest
+                                 ▼
+                  ┌──────────────────────────────┐
+                  │     Siphon Server Pipeline   │
+                  └──────────────┬───────────────┘
+                                 │
+         ┌───────────────────────┼───────────────────────┐
+         ▼                       ▼                       ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│     Parsers     │     │   Extractors    │     │    Enrichers    │
+├─────────────────┤     ├─────────────────┤     ├─────────────────┤
+│ URL/Path Norm   │     │ Docling, VLM,   │     │ Routing         │
+│ UUID Generation │     │ Whisper,        │     │ Summarizer,     │
+│ Schema Route    │     │ Trafilatura     │     │ HyDE Descriptor │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │ ProcessedContent
+                                 ▼
+                  ┌──────────────────────────────┐
+                  │    PostgreSQL (pgvector)     │
+                  ├──────────────────────────────┤
+                  │ Lexical computed tsvector    │
+                  │ Cosine HNSW Vector (768-dim) │
+                  └──────────────────────────────┘
+```
+
+### 1. Ingestion Pipeline Phases
+*   **Parse**: Analyzes URL/Path parameters, strips tracking strings, and resolves them to canonical custom URI formats (e.g., `doc:///docx/hash`, `youtube:///id`).
+*   **Extract**: Executes source-specific content converters. PDFs and Doc files undergo layout tree recovery, table reconstruction, OCR validation, and vision-model-assisted chart/diagram descriptions. Audio and video files utilize GPU sidecars running Whisper and PyAnnote for transcription and diarization.
+*   **Enrich**: Translates raw text inputs into dual semantic outputs: a structured Markdown summary and a dense, retrieval-optimized description mapped to answer-voice patterns (HyDE).
+*   **Store**: Writes outputs to the database. Updates clear pre-calculated embeddings and resets existing vector indices to ensure data parity.
+
+---
+
+## Installation & Setup
+
+### System Prerequisites
+*   **Python**: Version 3.12 or 3.13.
+*   **Database**: PostgreSQL 16+ with the `pgvector` extension installed.
+*   **System Binaries**: `ffmpeg` (required for audio and video extraction).
+*   **GPU Sidecars (Optional)**: Docker/Docker Compose for local execution of speech-to-text, speaker diarization, or local diffusion services.
+
+### Configuration
+Configure Siphon via environment variables or by creating a configuration file at `~/.config/siphon/config.toml`.
+
+| Environment Variable | Description | Default |
 | :--- | :--- | :--- |
-| `hybrid` (default) | RRF fusion of BM25 and semantic (vector) rankings | Most natural-language queries |
-| `semantic` | Vector-only retrieval | Conceptual queries where lexical noise hurts |
-| `fts` | BM25-only over the `fts_doc` tsvector | Exact-entity / quote / number lookups |
-| `sql` | Legacy ILIKE over title and description | Quick title-substring matches |
-| `fuzzy` | Reserved | Not yet implemented |
+| `POSTGRES_USERNAME` | Username for database access | None (Required) |
+| `POSTGRES_PASSWORD` | Password for database access | None (Required) |
+| `HUGGINGFACEHUB_API_TOKEN` | API Token for Hugging Face (PyAnnote weights) | None (Required) |
+| `YOUTUBE_API_KEY2` | Google Cloud API key for YouTube Data client | None |
+| `SIPHON_DEFAULT_MODEL` | Default LLM model for text completion and summarization | `gemma4:latest` |
+| `SIPHON_DOCLING_VLM_URL` | Endpoint of the Vision-Language Model service | `http://localhost:11434/v1/chat/completions` |
 
-The `hybrid` and `semantic` modes run HyDE by default: gpt-oss generates a hypothetical answer to the query, and that answer is embedded instead of the raw query. Disable with `--no-hyde` for faster, lower-quality retrieval on conversational queries.
+---
 
-```bash
-siphon query "claude code subagents"                         # hybrid (default) + HyDE
-siphon query "ECW cliff routing"          --mode semantic    # vector only
-siphon query "RoutingSummarizer"          --mode fts         # BM25 only
-siphon query "react useState"             --no-hyde -n 3     # embed raw query
-siphon query "machine learning" --type doc --extension pdf   # source filter
-siphon query "anthropic"                  --mode sql         # legacy ILIKE
-```
+## Basic Usage
 
-Date filters (`--date ">2024-01-01"`), extension filters (`--extension pdf`), and source-type filters (`--type youtube`) are post-applied for the new modes, so they over-fetch internally and may undercount if the filter is restrictive.
+The `siphon` command is organized into functional groups.
 
-#### traverse
-Walk the wikilink graph from a specific node (primarily for Obsidian).
-```bash
-siphon traverse "Project Phoenix" --depth 2 --backlinks
-```
+### Core CLI Commands
 
-#### results
-Access query history and retrieve specific items by their index from previous searches.
-```bash
-siphon results --history
-siphon query --get 2 --return-type c
-```
+| Command | Arguments | Options | Description |
+| :--- | :--- | :--- | :--- |
+| `gulp` | `[SOURCE]` | `-r [st/u/c/m/t/d/s/id/json]` | Fully ingests, enriches, and stores a source document. Returns specified fields. |
+| `parse` | `[SOURCE]` | `-r [u/st]` | Validates a source string and returns its canonical Siphon URI. |
+| `extract` | `[SOURCE]` | `-r [c/m/to]`, `--diarize` | Extracts raw transcript/text without database storage. |
+| `enrich` | `[SOURCE]` | `-r [s/d/t]` | Enriches raw inputs into summary/description metrics without storage. |
+| `query` | `[QUERY]` | `--type`, `--mode`, `--limit`, `--get`, `--open` | Executes semantic or lexical hybrid search over ingested entries. |
+| `results` | None | `--history`, `--get [ID]`, `--limit` | Reviews CLI search query history and re-loads matching document arrays. |
+| `sync` | None | `--vault [PATH]`, `--dry-run`, `--install-hook` | Walk, delta-evaluate, and bulk-ingest an Obsidian Markdown vault. |
+| `traverse` | `[NODE]` | `--depth`, `--backlinks` | Explores the internal wikilink reference graph starting at a defined URI node. |
+| `inspect` | `[URI]` | `--json` | Retrieves pipeline metrics, tracing records, and prompt tokens for debugging. |
 
-### Diagnostics
+### Querying the Database
 
-#### inspect
-Show the most recent enrichment run for a URI: routing decision (tier, model, host), timing, status, and the full conduit trace (rendered prompts plus redacted input echo). Pure Postgres read.
+Query the stored knowledge base using various retrieval modes:
 
 ```bash
-siphon inspect "youtube:///abc123XYZ"          # pretty-print
-siphon inspect "article:///sha256/..." --json  # raw JSON for LLM forensics
+# Semantic Vector-Only Search
+siphon query "adversarial attacks on large language models" --mode semantic --limit 5
+
+# Lexical BM25 FTS-Only Search
+siphon query "RoutingSummarizer" --mode fts
+
+# Hybrid RRF Fusion with Date Filters
+siphon query "machine learning guidelines" --mode hybrid --date ">2024-06-01"
 ```
 
-Two intended use cases:
-1. **Dev loop while iterating on guidelines or routing config** — diff traces across prompt revisions to confirm a change is doing what you expect.
-2. **Forensic mode when a summary looks wrong** — pipe `--json` to an LLM and ask it to diagnose what went wrong (the trace carries the actual rendered prompt that hit the model).
+If the results are shown as a table, use the index number with `--get` to retrieve full elements:
 
-## Supported Source Types
-
-| Type | Parser Logic | Extraction Method |
-| :--- | :--- | :--- |
-| **YouTube** | URL detection | `yt-dlp` metadata + `youtube-transcript-api` |
-| **Article** | Web URL (non-social) | `readabilipy` + `markdownify` |
-| **Doc** | `.pdf`, `.docx`, `.txt`, `.csv` | `MarkItDown` conversion |
-| **Audio** | `.mp3`, `.wav`, `.m4a` | Whisper Transcription + Pyannote Diarization |
-| **GitHub** | Repository URL | GitHub API tree traversal |
-| **Obsidian** | Vault-internal `.md` | Wikilink extraction + Frontmatter parsing |
-| **Email** | Gmail URL/ID | Google OAuth + Gmail API |
-| **Image** | `.jpg`, `.png`, `.svg` | Vision-LLM description |
-
-## Configuration
-
-Siphon looks for a configuration file at `~/.config/siphon/config.toml`.
-
-```toml
-default_model = "gpt-4o"
-log_level = 2
-cache = true
-vault = "~/vaults/main"
+```bash
+# Fetch the full summary of result #2 from the last search
+siphon query --get 2 -r s
 ```
-
-### Component Structure
-- `siphon-api`: Shared Pydantic models and interface definitions.
-- `siphon-server`: Pipeline orchestration, database logic, and source strategies.
-- `siphon-client`: CLI implementation and high-level client wrappers.
-- `workers`: Isolated sidecar services for heavy ML tasks (Diarization, Flux Image Gen).
