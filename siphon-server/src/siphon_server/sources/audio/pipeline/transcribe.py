@@ -7,12 +7,12 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-TRANSCRIPTION_SERVICE_URL = "http://localhost:8002"
+TRANSCRIPTION_SERVICE_URL = "http://172.16.0.2:9090"
 
 
 def transcribe(wav_file: Path) -> list[dict]:
     """
-    Transcribe audio via the whisper_gpu Docker sidecar.
+    Transcribe audio via the external whisper service.
 
     Returns a normalized list of chunks: [{text: str, start: float, end: float}]
     """
@@ -22,10 +22,13 @@ def transcribe(wav_file: Path) -> list[dict]:
 
     try:
         with open(wav_file, "rb") as f:
-            files_payload = {"file": (wav_file.name, f, "audio/wav")}
+            files_payload = {
+                "file": (wav_file.name, f, "audio/wav"),
+                "response_format": ("", "verbose_json"),
+            }
             with httpx.Client(timeout=600.0) as client:
                 response = client.post(
-                    f"{TRANSCRIPTION_SERVICE_URL}/process", files=files_payload
+                    f"{TRANSCRIPTION_SERVICE_URL}/inference", files=files_payload
                 )
         response.raise_for_status()
         data = response.json()
