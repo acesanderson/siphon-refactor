@@ -26,7 +26,7 @@ def transcribe(wav_file: Path) -> list[dict]:
                 "file": (wav_file.name, f, "audio/wav"),
                 "response_format": ("", "verbose_json"),
             }
-            with httpx.Client(timeout=600.0) as client:
+            with httpx.Client(timeout=1200.0) as client:
                 response = client.post(
                     f"{TRANSCRIPTION_SERVICE_URL}/inference", files=files_payload
                 )
