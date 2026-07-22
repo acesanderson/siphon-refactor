@@ -10,7 +10,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-TRANSCRIPTION_SERVICE_URL = "http://172.16.0.2:9090"
+TRANSCRIPTION_SERVICE_URL = "http://172.16.0.4:9090"
 
 # whisper.cpp works reliably with chunks up to ~30 minutes.
 # Files longer than this risk "failed to decode/encode" errors.
